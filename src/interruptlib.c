@@ -38,22 +38,22 @@ extern void intr31();
 
 char *exception_messages[] =
 {
-    "Division By Zero",
-    "Debug",
-    "Non Maskable Interrupt",
-    "Breakpoint",
-    "Into Detected Overflow",
-    "Out of Bounds",
-    "Invalid Opcode",
-    "No Coprocessor",
+    "Division By Zero", //0
+    "Debug", //1
+    "Non Maskable Interrupt", //2
+    "Breakpoint", //3
+    "Into Detected Overflow", //4
+    "Out of Bounds", //5
+    "Invalid Opcode", //6
+    "No Coprocessor", //7
 
-    "Double Fault",
-    "Coprocessor Segment Overrun",
-    "Bad TSS",
-    "Segment Not Present",
-    "Stack Fault",
-    "General Protection Fault",
-    "Page Fault",
+    "Double Fault", //8
+    "Coprocessor Segment Overrun", //9
+    "Bad TSS", //10
+    "Segment Not Present", //11
+    "Stack Fault", //12
+    "General Protection Fault", //13
+    "Page Fault", //14
     "Unknown Interrupt",
 
     "Coprocessor Fault",
@@ -77,7 +77,6 @@ char *exception_messages[] =
 
 void handler_interrupt(struct regs * r)
 {
-	write("Hello world!");
 	if (r->code < 32) {
 		write(exception_messages[r->code]);
 	}
@@ -106,11 +105,11 @@ void idt_set_gate(unsigned char num, unsigned long base, unsigned short sel, uns
 void idt_install()
 {
     /* Sets the special IDT pointer up, just like in 'gdt.c' */
-    idtp.size = (sizeof (struct idt_entry) * 31) - 1;
+    idtp.size = (sizeof (struct idt_entry) * 256);
     idtp.addr = (uint64_t)idt;
 
     /* Clear out the entire IDT, initializing it to zeros */
-	for (uint64_t i = 0; i < sizeof(struct idt_entry) * 31; i++) {
+	for (uint64_t i = 0; i < sizeof(struct idt_entry) * 256; i++) {
 		((char*)idt)[i] = 0;
 	}
 
@@ -123,16 +122,16 @@ void idt_install()
 
 void intr_install()
 {
-	idt_set_gate(0, (unsigned long)intr0, KERNEL_CS, 0x8E);  
-	idt_set_gate(1, (unsigned long)intr1, KERNEL_CS, 0x8E);  
-	idt_set_gate(2, (unsigned long)intr2, KERNEL_CS, 0x8E);  
-	idt_set_gate(3, (unsigned long)intr3, KERNEL_CS, 0x8E);  
-	idt_set_gate(4, (unsigned long)intr4, KERNEL_CS, 0x8E);  
-	idt_set_gate(5, (unsigned long)intr5, KERNEL_CS, 0x8E);  
-	idt_set_gate(6, (unsigned long)intr6, KERNEL_CS, 0x8E);  
-	idt_set_gate(7, (unsigned long)intr7, KERNEL_CS, 0x8E);  
-	idt_set_gate(8, (unsigned long)intr8, KERNEL_CS, 0x8E);  
-	idt_set_gate(9, (unsigned long)intr9, KERNEL_CS, 0x8E);  
+	idt_set_gate(0,  (unsigned long)intr0,  KERNEL_CS, 0x8E);  
+	idt_set_gate(1,  (unsigned long)intr1,  KERNEL_CS, 0x8E);  
+	idt_set_gate(2,  (unsigned long)intr2,  KERNEL_CS, 0x8E);  
+	idt_set_gate(3,  (unsigned long)intr3,  KERNEL_CS, 0x8E);  
+	idt_set_gate(4,  (unsigned long)intr4,  KERNEL_CS, 0x8E);  
+	idt_set_gate(5,  (unsigned long)intr5,  KERNEL_CS, 0x8E);  
+	idt_set_gate(6,  (unsigned long)intr6,  KERNEL_CS, 0x8E);  
+	idt_set_gate(7,  (unsigned long)intr7,  KERNEL_CS, 0x8E);  
+	idt_set_gate(8,  (unsigned long)intr8,  KERNEL_CS, 0x8E);  
+	idt_set_gate(9,  (unsigned long)intr9,  KERNEL_CS, 0x8E);  
 	idt_set_gate(10, (unsigned long)intr10, KERNEL_CS, 0x8E);  
 	idt_set_gate(11, (unsigned long)intr11, KERNEL_CS, 0x8E);  
 	idt_set_gate(12, (unsigned long)intr12, KERNEL_CS, 0x8E);  
@@ -155,4 +154,14 @@ void intr_install()
 	idt_set_gate(29, (unsigned long)intr29, KERNEL_CS, 0x8E);  
 	idt_set_gate(30, (unsigned long)intr30, KERNEL_CS, 0x8E);  
 	idt_set_gate(31, (unsigned long)intr31, KERNEL_CS, 0x8E);  
+}
+
+void set_interrupt()
+{
+    __asm__ __volatile__("sti");
+}
+
+void clear_interrupt()
+{
+    __asm__ __volatile__("cli");
 }

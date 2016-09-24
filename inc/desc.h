@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 struct regs {
-	uint64_t fq;
+	//uint64_t fq;
     uint64_t r15;
     uint64_t r14;
     uint64_t r13;
@@ -20,9 +20,9 @@ struct regs {
     uint64_t rcx;
     uint64_t rbx;
     uint64_t rax;
+	uint64_t code;
     uint64_t rsp;
-	unsigned char code;
-	unsigned char empty;
+	uint64_t error;
 } __attribute__((packed));
 
 struct idt_entry {

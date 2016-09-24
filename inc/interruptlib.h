@@ -5,9 +5,11 @@
 
 #define interrupt(x) { __asm__ volatile("int %0" : : "n"(x)); }
 
-
+void idt_set_gate(unsigned char num, unsigned long base, unsigned short sel, unsigned char flags);
 void handler_interrupt(struct regs * r);
 void intr_install();
 void idt_install();
+void set_interrupt();
+void clear_interrupt();
 
 #endif /*__INTERRUPTLIB_H__*/

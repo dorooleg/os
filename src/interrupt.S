@@ -1,6 +1,5 @@
 .text
 .extern handler_interrupt
-
 .global intr0
 .global intr1
 .global intr2
@@ -36,198 +35,225 @@
 
 intr0:
 	cli
-	push $0
-	push $0
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $0
 	jmp intr_common_stub
 
 intr1:
 	cli
-	push $0
-	push $1
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $1
 	jmp intr_common_stub
 
 intr2:
 	cli
-	push $0
-	push $2
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $2
 	jmp intr_common_stub
 
 intr3:
 	cli
-	push $0
-	push $3
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $3
 	jmp intr_common_stub
 
 intr4:
 	cli
-	push $0
-	push $4
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $4
 	jmp intr_common_stub
 
 intr5:
 	cli
-	push $0
-	push $5
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $5
 	jmp intr_common_stub
 
 intr6:
 	cli
-	push $0
-	push $6
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $6
 	jmp intr_common_stub
 
 intr7:
 	cli
-	push $0
-	push $7
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $7
 	jmp intr_common_stub
 
 intr8:
 	cli
-    push $0
-	push $8
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $8
 	jmp intr_common_stub
 
 intr9:
 	cli
-    push $0
-	push $9
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $9
 	jmp intr_common_stub
 
 intr10:
 	cli
-    push $0
-	push $10
+	pushq %rsp 
+	pushq $10
 	jmp intr_common_stub
 
 intr11:
 	cli
-    push $0
-	push $11
+	pushq %rsp 
+	pushq $11
 	jmp intr_common_stub
 
 intr12:
 	cli
-    push $0
-	push $12
+	pushq %rsp 
+	pushq $12
 	jmp intr_common_stub
 
 intr13:
 	cli
-    push $0
-	push $13
+	pushq %rsp 
+	pushq $13
 	jmp intr_common_stub
 
 intr14:
 	cli
-    push $0
-	push $14
+	pushq %rsp 
+	pushq $14
 	jmp intr_common_stub
 
 intr15:
 	cli
-	push $0
-	push $15
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $15
 	jmp intr_common_stub
 
 intr16:
 	cli
-	push $0
-	push $16
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $16
 	jmp intr_common_stub
 
 intr17:
 	cli
-	push $0
-	push $17
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $17
 	jmp intr_common_stub
 
 intr18:
 	cli
-	push $0
-	push $18
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $18
 	jmp intr_common_stub
 
 intr19:
 	cli
-	push $0
-	push $19
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $19
 	jmp intr_common_stub
 
 intr20:
 	cli
-	push $0
-	push $20
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $20
 	jmp intr_common_stub
 
 intr21:
 	cli
-	push $0
-	push $21
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $21
 	jmp intr_common_stub
 
 intr22:
 	cli
-	push $0
-	push $22
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $22
 	jmp intr_common_stub
 
 intr23:
 	cli
-	push $0
-	push $23
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $23
 	jmp intr_common_stub
 
 intr24:
 	cli
-	push $0
-	push $24
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $24
 	jmp intr_common_stub
 
 intr25:
 	cli
-	push $0
-	push $25
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $25
 	jmp intr_common_stub
 
 intr26:
 	cli
-	push $0
-	push $26
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $26
 	jmp intr_common_stub
 
 intr27:
 	cli
-	push $0
-	push $27
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $27
 	jmp intr_common_stub
 
 intr28:
 	cli
-	push $0
-	push $28
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $28
 	jmp intr_common_stub
 
 intr29:
 	cli
-	push $0
-	push $29
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $29
 	jmp intr_common_stub
 
 intr30:
 	cli
-	push $0
-	push $30
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $30
 	jmp intr_common_stub
 
 intr31:
 	cli
-	push $0
-	push $31
+	subq $4, %rsp
+	pushq %rsp 
+	pushq $31
 	jmp intr_common_stub
 
 intr_common_stub:
-    pushq %rsp
+    #pushq %rsp
 	pushq %rax
     pushq %rbx
     pushq %rcx
@@ -243,13 +269,10 @@ intr_common_stub:
     pushq %r13
     pushq %r14
     pushq %r15
-    pushfq
-
+#   pushfq
 	movq	%rsp, %rdi
-
     call handler_interrupt
-
-	popfq
+#	popfq
     popq %r15
     popq %r14
     popq %r13
@@ -265,7 +288,8 @@ intr_common_stub:
     popq %rcx
     popq %rbx
     popq %rax
+	addq $0x8, %rsp
     popq %rsp
-	addq $16, %rsp
-
+	addq $0x4, %rsp
+	sti
     iretq
