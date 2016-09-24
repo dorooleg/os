@@ -15,6 +15,7 @@ static void qemu_gdb_hang(void)
 #include <pitlib.h>
 #include <irqlib.h>
 #include <ioport.h>
+#include <printf.h>
 
 void main(void)
 {
@@ -29,7 +30,9 @@ void main(void)
 
 	interrupt(1);
 
+    printf("Hello %corld%c%s %o %lli", 'w', '!', "One", 15, 213278569235LL);
 
+    clear_interrupt();
 
     while (1);
 }
