@@ -1,3 +1,4 @@
+//#define DEBUG
 static void qemu_gdb_hang(void)
 {
 #ifdef DEBUG
@@ -9,14 +10,22 @@ static void qemu_gdb_hang(void)
 
 #include <desc.h>
 #include <ints.h>
+#include <iolib.h>
+#include <interruptlib.h>
 
 void main(void)
 {
-	qemu_gdb_hang();
+    qemu_gdb_hang();
 
-	struct desc_table_ptr ptr = {0, 0};
+    struct desc_table_ptr ptr = {0, 0};
 
-	write_idtr(&ptr);
+    write_idtr(&ptr);
 
-	while (1);
+    init_io();
+    idt_install();
+    intr_install();
+
+    interrupt(8);
+
+    while (1);
 }
