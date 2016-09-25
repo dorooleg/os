@@ -43,7 +43,7 @@ void main(void)
 
     foo1();
     printf("Hello %corld%c%s %o %lli", 'w', '!', "One", 15, 213278569235LL);
-    clear_interrupt();
+//    clear_interrupt();
 
     while (1);
 }
