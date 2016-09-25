@@ -98,10 +98,8 @@ irq_common_stub:
     pushq %r14
     pushq %r15
 	movq	%rsp, %rdi
-    pushfq
     cld
     call handler_irq
- 	popfq
     popq %r15
     popq %r14
     popq %r13
