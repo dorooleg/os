@@ -4,6 +4,7 @@
 #include <ioport.h>
 #include <memory.h>
 #include <iolib.h>
+#include <ints.h>
 
 extern void irq0();
 extern void irq1();
@@ -37,7 +38,7 @@ void irq_set_handler(int irq, void (*handler)(struct regs *r))
 
 void irq_remap()
 {
-	clear_interrupt();
+    disable_ints(); 
 
 	out8(0x20, 0x11);
     out8(0xA0, 0x11);
@@ -47,10 +48,8 @@ void irq_remap()
     out8(0xA1, 0x02);
     out8(0x21, 0x01);
     out8(0xA1, 0x01);
-    out8(0x21, 0x0);
-    out8(0xA1, 0x0);
 	
-	set_interrupt();
+	enable_ints();
 }
 
 

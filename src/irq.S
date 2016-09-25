@@ -18,103 +18,70 @@
 .global irq15
 
 irq0:
-	cli
-    pushq %rsp
 	pushq $32
 	jmp irq_common_stub
 
 irq1:
-	cli
-    pushq %rsp
 	pushq $33
 	jmp irq_common_stub
 
 irq2:
-	cli
-    pushq %rsp
 	pushq $34
 	jmp irq_common_stub
 
 irq3:
-	cli
-    pushq %rsp
 	pushq $35
 	jmp irq_common_stub
 
 irq4:
-	cli
-    pushq %rsp
 	pushq $36
 	jmp irq_common_stub
 
 irq5:
-	cli
-    pushq %rsp
 	pushq $37
 	jmp irq_common_stub
 
 irq6:
-	cli
-    pushq %rsp
 	pushq $38
 	jmp irq_common_stub
 
 irq7:
-	cli
-    pushq %rsp
 	pushq $39
 	jmp irq_common_stub
 
 irq8:
-	cli
-    pushq %rsp
 	pushq $40
 	jmp irq_common_stub
 
 irq9:
-	cli
-    pushq %rsp
 	pushq $41
 	jmp irq_common_stub
 
 irq10:
-	cli
-    pushq %rsp
 	pushq $42
 	jmp irq_common_stub
 
 irq11:
-	cli
-    pushq %rsp
 	pushq $43
 	jmp irq_common_stub
 
 irq12:
-	cli
-    pushq %rsp
 	pushq $44
 	jmp irq_common_stub
 
 irq13:
-	cli
-    pushq %rsp
 	pushq $45
 	jmp irq_common_stub
 
 irq14:
-	cli
-    pushq %rsp
 	pushq $46
 	jmp irq_common_stub
 
 irq15:
-	cli
-    pushq %rsp
 	pushq $47
 	jmp irq_common_stub
 
 irq_common_stub:
-    #pushq %rsp
 	pushq %rax
     pushq %rbx
     pushq %rcx
@@ -130,10 +97,11 @@ irq_common_stub:
     pushq %r13
     pushq %r14
     pushq %r15
-#    pushfq
 	movq	%rsp, %rdi
+    pushfq
+    cld
     call handler_irq
-# 	popfq
+ 	popfq
     popq %r15
     popq %r14
     popq %r13
@@ -149,8 +117,6 @@ irq_common_stub:
     popq %rcx
     popq %rbx
     popq %rax
-    #popq %rsp
 	addq $0x8, %rsp
-	popq %rsp
 	sti
     iretq

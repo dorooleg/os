@@ -17,6 +17,7 @@ static void qemu_gdb_hang(void)
 #include <ioport.h>
 #include <printf.h>
 #include <backtrace.h>
+#include <ints.h>
 
 void foo2();
 void foo1()
@@ -43,7 +44,7 @@ void main(void)
 
     foo1();
     printf("Hello %corld%c%s %o %lli", 'w', '!', "One", 15, 213278569235LL);
-//    clear_interrupt();
+//    disable_ints();
 
     while (1);
 }

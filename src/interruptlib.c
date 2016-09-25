@@ -155,13 +155,3 @@ void intr_install()
 	idt_set_gate(30, (unsigned long)intr30, KERNEL_CS, 0x8E);  
 	idt_set_gate(31, (unsigned long)intr31, KERNEL_CS, 0x8E);  
 }
-
-void set_interrupt()
-{
-    __asm__ __volatile__("sti");
-}
-
-void clear_interrupt()
-{
-    __asm__ __volatile__("cli");
-}
