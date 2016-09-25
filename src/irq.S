@@ -118,5 +118,4 @@ irq_common_stub:
     popq %rbx
     popq %rax
 	addq $0x8, %rsp
-	sti
     iretq

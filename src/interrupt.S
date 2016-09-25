@@ -34,52 +34,52 @@
 .global intr31
 
 intr0:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $0
 	jmp intr_common_stub
 
 intr1:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $1
 	jmp intr_common_stub
 
 intr2:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $2
 	jmp intr_common_stub
 
 intr3:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $3
 	jmp intr_common_stub
 
 intr4:
-	subq $4, %rsp
-	pushq $4
+	subq $8, %rsp
+	pushq $8
 	jmp intr_common_stub
 
 intr5:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $5
 	jmp intr_common_stub
 
 intr6:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $6
 	jmp intr_common_stub
 
 intr7:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $7
 	jmp intr_common_stub
 
 intr8:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $8
 	jmp intr_common_stub
 
 intr9:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $9
 	jmp intr_common_stub
 
@@ -104,86 +104,86 @@ intr14:
 	jmp intr_common_stub
 
 intr15:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $15
 	jmp intr_common_stub
 
 intr16:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $16
 	jmp intr_common_stub
 
 intr17:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $17
 	jmp intr_common_stub
 
 intr18:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $18
 	jmp intr_common_stub
 
 intr19:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $19
 	jmp intr_common_stub
 
 intr20:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $20
 	jmp intr_common_stub
 
 intr21:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $21
 	jmp intr_common_stub
 
 intr22:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $22
 	jmp intr_common_stub
 
 intr23:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $23
 	jmp intr_common_stub
 
 intr24:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $24
 	jmp intr_common_stub
 
 intr25:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $25
 	jmp intr_common_stub
 
 intr26:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $26
 	jmp intr_common_stub
 
 intr27:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $27
 	jmp intr_common_stub
 
 intr28:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $28
 	jmp intr_common_stub
 
 intr29:
-	subq $4, %rsp
+	subq $8, %rsp
 	pushq $29
 	jmp intr_common_stub
 
 intr30:
-	subq $4, %rsp
+	subq $8, %rsp
 	jmp intr_common_stub
 
 intr31:
-	subq $4, %rsp
+	subq $8, %rsp
 	jmp intr_common_stub
 
 intr_common_stub:
@@ -222,6 +222,5 @@ intr_common_stub:
     popq %rcx
     popq %rbx
     popq %rax
-	addq $0xc, %rsp
-	sti
+	addq $0x10, %rsp
     iretq

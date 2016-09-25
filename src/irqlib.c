@@ -40,15 +40,17 @@ void irq_remap()
 {
     disable_ints(); 
 
-	out8(0x20, 0x11);
-    out8(0xA0, 0x11);
-    out8(0x21, 0x20);
-    out8(0xA1, 0x28);
-    out8(0x21, 0x04);
-    out8(0xA1, 0x02);
-    out8(0x21, 0x01);
-    out8(0xA1, 0x01);
-	
+	out8(0x20, 0x11); //master command //0001 0001 //init command [wait 3 bytes][SNGL=0][edge triggered]
+    out8(0xA0, 0x11); //slave command //0001 0001 //init coomand [wait 3 bytes][SNGL=0][edge triggered]
+    out8(0x21, 0x20); //master data // mapping
+    out8(0xA1, 0x28); //slave data  //mapping
+    out8(0x21, 0x04); //master data //configuration cascade
+    out8(0xA1, 0x02); //slave data //configuration cascade
+    out8(0x21, 0x01); //master data //different functions
+    out8(0xA1, 0x01); //slave data //different functions
+	out8(0x20, 0xEE); //master data //mask devices
+    out8(0xA0, 0xEE); //slave data //mask devices
+
 	enable_ints();
 }
 
