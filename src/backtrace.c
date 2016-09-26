@@ -20,17 +20,22 @@ void backtrace()
 	count = 0;
 	printf("backtrace\n");
 
-	while(((uint64_t)current_frame->previous_frame & (uint64_t)VIRTUAL_BASE) == (uint64_t)VIRTUAL_BASE
-           && ((uint64_t)current_frame->previous_frame & (uint64_t)0xffffffff) <= (uint64_t)0x80107000
-           && current_frame->previous_frame >= sp)
-	{
-		printf("%d\t - 0x%p\n", count, current_frame->return_addr);
-		++count;
-        if ((void*)current_frame >= current_frame->previous_frame) {
-            break;
+	if ((void*)current_frame >= sp
+          && ((uint64_t)current_frame & (uint64_t)VIRTUAL_BASE) == (uint64_t)VIRTUAL_BASE
+          && ((uint64_t)current_frame & (uint64_t)0xffffffff) <= (uint64_t)0x80107000)
+    {
+        while(current_frame->previous_frame >= sp
+              && ((uint64_t)current_frame->previous_frame & (uint64_t)VIRTUAL_BASE) == (uint64_t)VIRTUAL_BASE
+              && ((uint64_t)current_frame->previous_frame & (uint64_t)0xffffffff) <= (uint64_t)0x80107000)
+        {
+            printf("%d\t - 0x%p\n", count, current_frame->return_addr);
+            ++count;
+            if ((void*)current_frame >= current_frame->previous_frame) {
+                break;
+            }
+            current_frame = current_frame->previous_frame;
         }
-		current_frame = current_frame->previous_frame;
-	}
+    }
 	printf("end of backtrace (total=%d)\n", count);
 }
 
