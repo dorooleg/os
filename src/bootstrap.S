@@ -28,16 +28,16 @@ multiboot_header:
 
 
 	.align 16
-gdt:
+gdt:    //base_high(8) + granularity(8) + access(8) + base_middle(8) + base_low(16) + limit_low(16)
 	.quad 0x0000000000000000
-	.quad 0x00209b0000000000 // 64 bit ring0 code segment
-	.quad 0x0020930000000000 // 64 bit ring0 data segment
-	.quad 0x0020fb0000000000 // 64 bit ring3 code segment
-	.quad 0x0020f30000000000 // 64 bit ring3 data segment
+	.quad 0x00209b0000000000 // 64 bit ring0 code segment // granularity = 0010 0000 access = 1001 1011
+	.quad 0x0020930000000000 // 64 bit ring0 data segment // granularity = 0010 0000 access = 1001 0011 
+	.quad 0x0020fb0000000000 // 64 bit ring3 code segment // granularity = 0010 0000 access = 1111 1011
+	.quad 0x0020f30000000000 // 64 bit ring3 data segment // granularity = 0010 0000 access = 1111 0011 
 	.quad 0x0000000000000000 // reserve for TSS
 	.quad 0x0000000000000000
-	.quad 0x00cf9b000000ffff // 32 bit ring0 code segment
-	.quad 0x00cf93000000ffff // 32 bit ring0 data segment
+	.quad 0x00cf9b000000ffff // 32 bit ring0 code segment // granularity = 1100 1111 access = 1001 1011
+	.quad 0x00cf93000000ffff // 32 bit ring0 data segment // granularity = 1100 1111 access = 1001 0011
 	.quad 0x0000000000000000
 gdt_ptr:
 	.word (gdt_ptr - gdt - 1)

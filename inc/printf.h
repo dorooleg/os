@@ -18,6 +18,7 @@ void print_long(long number);
 void print_unsigned_long(unsigned long number);
 void print_long_long(long long number);
 void print_unsigned_long_long(unsigned long long number);
+void print_unsigned_long_long_hex(unsigned long long number);
 void reverse(char * str);
 
 #endif //__PRINTF_H__ 

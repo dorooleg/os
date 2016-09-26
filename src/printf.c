@@ -53,29 +53,33 @@ int vprintf(const char * format, va_list arg)
             }
             switch (format[l])
             {
-                case 'c':  {
-                    print_char(va_arg(arg, int));  
+                case 'p':  {
+                    print_unsigned_long_long_hex(va_arg(arg, unsigned long long));
                     break;
                 }
-                case 'd': 
+                case 'c':  {
+                    print_char(va_arg(arg, int));
+                    break;
+                }
+                case 'd':
                 case 'i':  {
-                    print_decimal(va_arg(arg, int));  
+                    print_decimal(va_arg(arg, int));
                     break;
                 }
                 case 'o': {
-                    print_unsigned_decimal_oct(va_arg(arg, unsigned int));  
+                    print_unsigned_decimal_oct(va_arg(arg, unsigned int));
                     break;
                 }
                 case 'x': {
-                    print_unsigned_decimal_hex(va_arg(arg, unsigned int));  
+                    print_unsigned_decimal_hex(va_arg(arg, unsigned int));
                     break;
                 }
                 case 'u': {
-                    print_unsigned_decimal(va_arg(arg, unsigned int));  
+                    print_unsigned_decimal(va_arg(arg, unsigned int));
                     break;
                 }
                 case 's':  {
-                    write(va_arg(arg, char *));  
+                    write(va_arg(arg, char *));
                     break;
                 }
                 case 'h': {
@@ -97,7 +101,7 @@ int vprintf(const char * format, va_list arg)
                     if (format[l] == 'u' || format[l] == 'o' || format[l] == 'x') {
                         print_unsigned_short(va_arg(arg, int));
                     }
-                    
+
                     break;
                 }
                 case 'l': {
@@ -135,8 +139,8 @@ int vprintf(const char * format, va_list arg)
 
 int printf(const char * format, ...)
 {
-    va_list arg; 
-    va_start(arg, format); 
+    va_list arg;
+    va_start(arg, format);
     int err = vprintf(format, arg);
     va_end(arg);
     return err;
@@ -159,15 +163,15 @@ void print_unsigned_decimal_hex(unsigned int number)
         print_char('0');
         return;
     }
-    char str[50]; 
-    int i = 0; 
-    while (number != 0) { 
-        str[i++] = ( number % 16 > 9 ? 'a' + number % 16 - 10 : '0' + number % 16 ); 
-        number /= 16;  
-    } 
-    str[i] = 0; 
-    reverse(str); 
-    write(str); 
+    char str[50];
+    int i = 0;
+    while (number != 0) {
+        str[i++] = ( number % 16 > 9 ? 'a' + number % 16 - 10 : '0' + number % 16 );
+        number /= 16;
+    }
+    str[i] = 0;
+    reverse(str);
+    write(str);
 }
 
 void print_unsigned_decimal_oct(unsigned int number)
@@ -176,26 +180,26 @@ void print_unsigned_decimal_oct(unsigned int number)
         print_char('0');
         return;
     }
-    char str[50]; 
-    int i = 0; 
-    while (number != 0) { 
+    char str[50];
+    int i = 0;
+    while (number != 0) {
         str[i++] = '0' + number % 8;
-        number /= 8;  
-    } 
-    str[i] = 0; 
-    reverse(str); 
-    write(str); 
+        number /= 8;
+    }
+    str[i] = 0;
+    reverse(str);
+    write(str);
 }
 
 void print_char(char ch)
 {
     char str[2];
     str[0] = ch;
-    str[1] = 0; 
+    str[1] = 0;
     write(str);
 }
 
-void print_signed_char(char number) 
+void print_signed_char(char number)
 {
     __SIGNED
 }
@@ -247,6 +251,23 @@ void reverse(char * str)
         str[size - i - 1] = str[i];
         str[i] = tmp;
     }
+}
+
+void print_unsigned_long_long_hex(unsigned long long number)
+{
+    if (number == 0) {
+        print_char('0');
+        return;
+    }
+    char str[50];
+    int i = 0;
+    while (number != 0) {
+        str[i++] = ( number % 16 > 9 ? 'a' + number % 16 - 10 : '0' + number % 16 );
+        number /= 16;
+    }
+    str[i] = 0;
+    reverse(str);
+    write(str);
 }
 
 #undef __UNSIGNED
