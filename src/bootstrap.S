@@ -7,6 +7,7 @@
 	.section .bootstrap, "ax"
 	.code32
 	.global start32
+    .global multiboot_info_ptr
 	.extern main
 
 
@@ -49,6 +50,8 @@ idt_ptr:
 	.word 0
 	.quad 0
 
+multiboot_info_ptr:
+    .long 0x0
 	.align 16
 	.space 0x100
 stack_top:
@@ -65,6 +68,7 @@ stack_top:
 	jmp fail
 
 1:
+    mov %ebx, multiboot_info_ptr
 	call check_long_mode
 	call setup_mapping
 
