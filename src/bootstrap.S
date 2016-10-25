@@ -8,8 +8,8 @@
 	.code32
 	.global start32
     .global multiboot_info_ptr
+    .global bootstrap_pml4
 	.extern main
-
 
 	.align 16
 start32:
@@ -139,6 +139,7 @@ setup_mapping:
 	movl $(bootstrap_pml4 - VIRTUAL_BASE), %edi
 	movl $(bootstrap_pml3 - VIRTUAL_BASE + PTE_PRESENT + PTE_WRITE), %eax
 	movl %eax, (%edi)
+	movl %eax, 2048(%edi)
 	movl %eax, 4088(%edi)
 
 	movl %cr4, %eax

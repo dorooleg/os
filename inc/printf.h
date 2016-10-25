@@ -2,12 +2,13 @@
 #define __PRINTF_H__ 
 
 #include <stdarg.h>
+#include <stdint.h>
 
 int vprintf(const char * format, va_list arg);
 int printf(const char * format, ...);
 void print_decimal(int number);
 void print_unsigned_decimal(unsigned int number);
-void print_unsigned_decimal_hex(unsigned int number);
+void print_unsigned_decimal_hex(uint64_t number);
 void print_unsigned_decimal_oct(unsigned int number);
 void print_char(char number);
 void print_signed_char(char number);

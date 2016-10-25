@@ -1,6 +1,7 @@
 #include <printf.h>
 #include <stdarg.h>
 #include <iolib.h>
+#include <stdint.h>
 
 #define __UNSIGNED \
     char str[50]; \
@@ -71,7 +72,7 @@ int vprintf(const char * format, va_list arg)
                     break;
                 }
                 case 'x': {
-                    print_unsigned_decimal_hex(va_arg(arg, unsigned int));
+                    print_unsigned_decimal_hex(va_arg(arg, uint64_t));
                     break;
                 }
                 case 'u': {
@@ -157,7 +158,7 @@ void print_unsigned_decimal(unsigned int number)
 }
 
 
-void print_unsigned_decimal_hex(unsigned int number)
+void print_unsigned_decimal_hex(uint64_t number)
 {
     if (number == 0) {
         print_char('0');
