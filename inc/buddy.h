@@ -25,7 +25,7 @@ void setup_buddy(void);
 uint64_t alloc_buddy(uint32_t size);
 void free_buddy(uint64_t* addr);
 
-#define BLOCK_SIZE 128
+#define BLOCK_SIZE 64
 
 #define BLOCK1  0x1LL
 #define BLOCK2  0x3LL

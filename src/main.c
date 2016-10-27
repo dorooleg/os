@@ -24,6 +24,7 @@ static void qemu_gdb_hang(void)
 #include <buddy.h>
 #include <slab.h>
 #include <malloc.h>
+#include <memory.h>
 
 extern uintptr_t text_phys_begin[];
 extern uintptr_t bss_phys_begin[];
@@ -72,6 +73,18 @@ void main(void)
     setup_buddy();
     print_physical_memory_table();
 
+    {
+        uint64_t* arr = (uint64_t*)alloc_buddy(129);
+        printf("%x\n", arr);
+        arr = (uint64_t*)alloc_buddy(2);
+        printf("%x\n", arr);
+        arr = (uint64_t*)alloc_buddy(2);
+        printf("%x\n", arr);
+        arr = (uint64_t*)alloc_buddy(PAGE_SIZE);
+        printf("%x\n", arr);
+        arr = (uint64_t*)alloc_buddy(PAGE_SIZE);
+        printf("%x\n", arr);
+    }
     uint64_t * arr = (uint64_t*)alloc_buddy(32 * sizeof(uint64_t));
     printf("%x\n", arr);
     free_buddy(arr);
@@ -82,14 +95,13 @@ void main(void)
     printf("%x\n", arr);
     arr = (uint64_t*)alloc_buddy(13 * sizeof(uint64_t));
     printf("%x\n", arr);
+
     arr[0] = 0;
     arr[1] = 1;
     for (uint32_t i = 2; i < 32; i++) {
         arr[i] = arr[i - 1] + arr[i - 2];
     }
     printf("%i", arr[10]);
-
-    
 
     printf("now\n");
     slab_metadata slab64 = create_slab_allocator(64);
@@ -120,7 +132,6 @@ void main(void)
     free(big_fib);
     big_fib = (uint64_t*)malloc(4096 * sizeof(uint64_t));
     printf("big_fib = %x\n", big_fib);
-    
     
     while (1);
 }

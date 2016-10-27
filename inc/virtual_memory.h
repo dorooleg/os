@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <multiboot.h>
 
-#define SET_FLAG(flags,bit)   (flags = (flags) | (1 << (bit)))
-#define CLR_FLAG(flags,bit)   (flags = (flags) ^ (1 << (bit)))
+#define SET_FLAG(flags,bit)   (flags = (flags) | (1LL << (bit)))
+#define CLR_FLAG(flags,bit)   (flags = (flags) ^ (1LL << (bit)))
 #define MAX_MEMORY_MAP_SIZE 32
 #define PML3_MAX_SIZE 512
 #define GB1 0x40000000LL

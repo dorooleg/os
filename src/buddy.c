@@ -55,7 +55,7 @@ int32_t mark_block(uint64_t page_id, uint64_t block, uint64_t offset)
             return block_offset;
         }
 
-        block_offset += 1;
+        block_offset += offset;
         block <<= offset;
         bit_end <<= offset;
     }
@@ -107,9 +107,10 @@ uint8_t down_level(uint8_t l, uint64_t page_id)
     for (; l > 0; l--) {
         if (check_level(l, page_id)) {
             max_level = l;
+            return max_level;
         }
     }
-    return max_level;
+    return 0;
 }
 
 uint64_t get_block(uint8_t l, uint64_t block, uint64_t offset)
@@ -122,9 +123,19 @@ uint64_t get_block(uint8_t l, uint64_t block, uint64_t offset)
 
             if (new_level != l) {
                 buddy_node* head = _buddy_stair[l].next;
-                _buddy_stair[l].next  = buddy_table + head->next;
-                _buddy_stair[l].next->prev = 0;
-                head->next = _buddy_stair[new_level].next - buddy_table;
+                if (head->next != 0) {
+                    _buddy_stair[l].next = buddy_table + head->next;
+                } else {
+                    _buddy_stair[l].next = 0;
+                }
+                if (_buddy_stair[l].next != 0) {
+                    _buddy_stair[l].next->prev = 0;
+                }
+                if (_buddy_stair[new_level].next != 0) {
+                    head->next = _buddy_stair[new_level].next - buddy_table;
+                } else {
+                    head->next = 0;
+                }
                 _buddy_stair[new_level].next->prev = head - buddy_table;
                 head->prev = 0;
                 head->head = (uint64_t)(_buddy_stair + new_level);
@@ -195,10 +206,22 @@ void free_buddy(uint64_t* addr)
     uint8_t new_level = up_level(l, page_index);
 
     if (new_level != l) {
-        buddy_node* head = _buddy_stair[l].next;
-        _buddy_stair[l].next  = buddy_table + head->next;
+        buddy_node* head = buddy_table + page_index;
+        buddy_table[head->prev].next = head->next;
+        if (head->next != 0) {
+            buddy_table[head->next].prev = head->prev;
+        }
+        if (head->next != 0) {
+            _buddy_stair[l].next  = buddy_table + head->next;
+        } else {
+            _buddy_stair[l].next  = 0;
+        }
         _buddy_stair[l].next->prev = 0;
-        head->next = _buddy_stair[new_level].next - buddy_table;
+        if (_buddy_stair[new_level].next != 0) {
+            head->next = _buddy_stair[new_level].next - buddy_table;
+        } else {
+            head->next = 0;
+        }
         _buddy_stair[new_level].next->prev = head - buddy_table;
         head->prev = 0;
         head->head = (uint64_t)(_buddy_stair + new_level);
