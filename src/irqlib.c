@@ -40,7 +40,7 @@ void irq_remap()
 {
     disable_ints(); 
 
-	out8(0x20, 0x11); //master command //0001 0001 //init command [wait 3 bytes][SNGL=0][edge triggered]
+    out8(0x20, 0x11); //master command //0001 0001 //init command [wait 3 bytes][SNGL=0][edge triggered]
     out8(0xA0, 0x11); //slave command //0001 0001 //init coomand [wait 3 bytes][SNGL=0][edge triggered]
     out8(0x21, 0x20); //master data // mapping
     out8(0xA1, 0x28); //slave data  //mapping
@@ -48,33 +48,33 @@ void irq_remap()
     out8(0xA1, 0x02); //slave data //configuration cascade
     out8(0x21, 0x01); //master data //different functions
     out8(0xA1, 0x01); //slave data //different functions
-	out8(0x20, 0xEE); //master data //mask devices
+    out8(0x20, 0xEE); //master data //mask devices
     out8(0xA0, 0xEE); //slave data //mask devices
 
-	enable_ints();
+    enable_ints();
 }
 
 
 void irq_init()
 {
-	irq_remap();
+    irq_remap();
 
-	idt_set_gate(32, (unsigned long)irq0, KERNEL_CS, 0x8E);  
-	idt_set_gate(33, (unsigned long)irq1, KERNEL_CS, 0x8E);  
-	idt_set_gate(34, (unsigned long)irq2, KERNEL_CS, 0x8E);  
-	idt_set_gate(35, (unsigned long)irq3, KERNEL_CS, 0x8E);  
-	idt_set_gate(36, (unsigned long)irq4, KERNEL_CS, 0x8E);  
-	idt_set_gate(37, (unsigned long)irq5, KERNEL_CS, 0x8E);  
-	idt_set_gate(38, (unsigned long)irq6, KERNEL_CS, 0x8E);  
-	idt_set_gate(39, (unsigned long)irq7, KERNEL_CS, 0x8E);  
-	idt_set_gate(40, (unsigned long)irq8, KERNEL_CS, 0x8E);  
-	idt_set_gate(41, (unsigned long)irq8, KERNEL_CS, 0x8E);  
-	idt_set_gate(42, (unsigned long)irq10, KERNEL_CS, 0x8E);  
-	idt_set_gate(43, (unsigned long)irq11, KERNEL_CS, 0x8E);  
-	idt_set_gate(44, (unsigned long)irq12, KERNEL_CS, 0x8E);  
-	idt_set_gate(45, (unsigned long)irq13, KERNEL_CS, 0x8E);  
-	idt_set_gate(46, (unsigned long)irq14, KERNEL_CS, 0x8E);  
-	idt_set_gate(47, (unsigned long)irq15, KERNEL_CS, 0x8E);  
+    idt_set_gate(32, (unsigned long)irq0, KERNEL_CS, 0x8E);  
+    idt_set_gate(33, (unsigned long)irq1, KERNEL_CS, 0x8E);  
+    idt_set_gate(34, (unsigned long)irq2, KERNEL_CS, 0x8E);  
+    idt_set_gate(35, (unsigned long)irq3, KERNEL_CS, 0x8E);  
+    idt_set_gate(36, (unsigned long)irq4, KERNEL_CS, 0x8E);  
+    idt_set_gate(37, (unsigned long)irq5, KERNEL_CS, 0x8E);  
+    idt_set_gate(38, (unsigned long)irq6, KERNEL_CS, 0x8E);  
+    idt_set_gate(39, (unsigned long)irq7, KERNEL_CS, 0x8E);  
+    idt_set_gate(40, (unsigned long)irq8, KERNEL_CS, 0x8E);  
+    idt_set_gate(41, (unsigned long)irq8, KERNEL_CS, 0x8E);  
+    idt_set_gate(42, (unsigned long)irq10, KERNEL_CS, 0x8E);  
+    idt_set_gate(43, (unsigned long)irq11, KERNEL_CS, 0x8E);  
+    idt_set_gate(44, (unsigned long)irq12, KERNEL_CS, 0x8E);  
+    idt_set_gate(45, (unsigned long)irq13, KERNEL_CS, 0x8E);  
+    idt_set_gate(46, (unsigned long)irq14, KERNEL_CS, 0x8E);  
+    idt_set_gate(47, (unsigned long)irq15, KERNEL_CS, 0x8E);  
 }
 
 void handler_irq(struct regs *r)

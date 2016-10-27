@@ -79,7 +79,9 @@ void main(void)
     printf("%x\n", arr);
     free_buddy(arr);
     arr = (uint64_t*)alloc_buddy(32 * sizeof(uint64_t));
+    printf("%x\n", arr);
     arr = (uint64_t*)alloc_buddy(13 * sizeof(uint64_t));
+    printf("%x\n", arr);
     arr[0] = 0;
     arr[1] = 1;
     for (uint32_t i = 2; i < 32; i++) {

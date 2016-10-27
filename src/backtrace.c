@@ -1,41 +1,49 @@
 #include <backtrace.h>
-#include <interruptlib.h>
-#include <printf.h>
 #include <memory.h>
+#include <printf.h>
 
-struct frame
+#define RBP(x)    __asm__ ("movq %%rbp, %0" : "=rm"(x))
+#define RSP(x)    __asm__ ("movq %%rsp, %0" : "=rm"(x))
+
+
+void __backtrace(uintptr_t rbp, uintptr_t stack_begin, uintptr_t stack_end)
 {
-	void * previous_frame;
-	void * return_addr;
-} __attribute__((packed));
+    int frame_index = 0;
 
+    while (rbp >= stack_begin && rbp + 16 <= stack_end) {
+        const uint64_t *frame = (const uint64_t *)rbp;
+        const uintptr_t prev_rbp = frame[0];
+        const uintptr_t prev_rip = frame[1];
 
-void backtrace()
-{
-    void * sp;
-	struct frame * current_frame;
-	int count;
-	__asm__ volatile("movq %%rbp, %0" : "=r" (current_frame));
-	__asm__ volatile("movq %%rsp, %0" : "=r" (sp));
-	count = 0;
-	printf("backtrace\n");
+        if (prev_rbp <= rbp)
+            break;
 
-	if ((void*)current_frame >= sp
-          && ((uint64_t)current_frame & (uint64_t)VIRTUAL_BASE) == (uint64_t)VIRTUAL_BASE
-          && ((uint64_t)current_frame & (uint64_t)0xffffffff) <= (uint64_t)0x80107000)
-    {
-        while(current_frame->previous_frame >= sp
-              && ((uint64_t)current_frame->previous_frame & (uint64_t)VIRTUAL_BASE) == (uint64_t)VIRTUAL_BASE
-              && ((uint64_t)current_frame->previous_frame & (uint64_t)0xffffffff) <= (uint64_t)0x80107000)
-        {
-            printf("%d\t - 0x%p\n", count, current_frame->return_addr);
-            ++count;
-            if ((void*)current_frame >= current_frame->previous_frame) {
-                break;
-            }
-            current_frame = current_frame->previous_frame;
-        }
+        printf("%d: rip 0x%x\n", frame_index, (unsigned long)prev_rip);
+        rbp = prev_rbp;
+        ++frame_index;
     }
-	printf("end of backtrace (total=%d)\n", count);
 }
 
+/* Here we assume that stack is PAGE_SIZE long and PAGE_SIZE
+ * aligned, alternatively we can export bootstrap stack limits
+ * from bootstrap.S */
+uintptr_t stack_begin(void)
+{
+    uintptr_t rsp;
+
+    RSP(rsp);
+    return rsp & ~((uintptr_t)(PAGE_SIZE - 1));
+}
+
+uintptr_t stack_end(void)
+{
+    return stack_begin() + PAGE_SIZE;
+}
+
+void backtrace(void)
+{
+    uintptr_t rbp;
+
+    RBP(rbp);
+    __backtrace(rbp, stack_begin(), stack_end());
+}

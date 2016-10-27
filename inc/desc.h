@@ -4,12 +4,12 @@
 #include <stdint.h>
 
 struct regs {
-	//uint64_t fq;
+    //uint64_t fq;
     uint64_t r15;
     uint64_t r14;
     uint64_t r13;
     uint64_t r12;
-   	uint64_t r11;
+       uint64_t r11;
     uint64_t r10;
     uint64_t r9;
     uint64_t r8;
@@ -20,9 +20,9 @@ struct regs {
     uint64_t rcx;
     uint64_t rbx;
     uint64_t rax;
-	uint64_t code;
+    uint64_t code;
     uint64_t rsp;
-	uint64_t error;
+    uint64_t error;
 } __attribute__((packed));
 
 struct idt_entry {
@@ -36,28 +36,28 @@ struct idt_entry {
 } __attribute__((packed));
 
 struct desc_table_ptr {
-	uint16_t size;
-	uint64_t addr;
+    uint16_t size;
+    uint64_t addr;
 } __attribute__((packed));
 
 static inline void read_idtr(struct desc_table_ptr *ptr)
 {
-	__asm__ ("sidt %0" : "=m"(*ptr));
+    __asm__ ("sidt %0" : "=m"(*ptr));
 }
 
 static inline void write_idtr(const struct desc_table_ptr *ptr)
 {
-	__asm__ ("lidt %0" : : "m"(*ptr));
+    __asm__ ("lidt %0" : : "m"(*ptr));
 }
 
 static inline void read_gdtr(struct desc_table_ptr *ptr)
 {
-	__asm__ ("sgdt %0" : "=m"(*ptr));
+    __asm__ ("sgdt %0" : "=m"(*ptr));
 }
 
 static inline void write_gdtr(const struct desc_table_ptr *ptr)
 {
-	__asm__ ("lgdt %0" : : "m"(*ptr));
+    __asm__ ("lgdt %0" : : "m"(*ptr));
 }
 
 #endif /*__DESC_H__*/

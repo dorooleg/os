@@ -34,160 +34,160 @@
 .global intr31
 
 intr0:
-	subq $8, %rsp
-	pushq $0
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $0
+    jmp intr_common_stub
 
 intr1:
-	subq $8, %rsp
-	pushq $1
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $1
+    jmp intr_common_stub
 
 intr2:
-	subq $8, %rsp
-	pushq $2
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $2
+    jmp intr_common_stub
 
 intr3:
-	subq $8, %rsp
-	pushq $3
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $3
+    jmp intr_common_stub
 
 intr4:
-	subq $8, %rsp
-	pushq $8
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $8
+    jmp intr_common_stub
 
 intr5:
-	subq $8, %rsp
-	pushq $5
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $5
+    jmp intr_common_stub
 
 intr6:
-	subq $8, %rsp
-	pushq $6
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $6
+    jmp intr_common_stub
 
 intr7:
-	subq $8, %rsp
-	pushq $7
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $7
+    jmp intr_common_stub
 
 intr8:
-	subq $8, %rsp
-	pushq $8
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $8
+    jmp intr_common_stub
 
 intr9:
-	subq $8, %rsp
-	pushq $9
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $9
+    jmp intr_common_stub
 
 intr10:
-	pushq $10
-	jmp intr_common_stub
+    pushq $10
+    jmp intr_common_stub
 
 intr11:
-	pushq $11
-	jmp intr_common_stub
+    pushq $11
+    jmp intr_common_stub
 
 intr12:
-	pushq $12
-	jmp intr_common_stub
+    pushq $12
+    jmp intr_common_stub
 
 intr13:
-	pushq $13
-	jmp intr_common_stub
+    pushq $13
+    jmp intr_common_stub
 
 intr14:
-	pushq $14
-	jmp intr_common_stub
+    pushq $14
+    jmp intr_common_stub
 
 intr15:
-	subq $8, %rsp
-	pushq $15
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $15
+    jmp intr_common_stub
 
 intr16:
-	subq $8, %rsp
-	pushq $16
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $16
+    jmp intr_common_stub
 
 intr17:
-	subq $8, %rsp
-	pushq $17
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $17
+    jmp intr_common_stub
 
 intr18:
-	subq $8, %rsp
-	pushq $18
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $18
+    jmp intr_common_stub
 
 intr19:
-	subq $8, %rsp
-	pushq $19
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $19
+    jmp intr_common_stub
 
 intr20:
-	subq $8, %rsp
-	pushq $20
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $20
+    jmp intr_common_stub
 
 intr21:
-	subq $8, %rsp
-	pushq $21
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $21
+    jmp intr_common_stub
 
 intr22:
-	subq $8, %rsp
-	pushq $22
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $22
+    jmp intr_common_stub
 
 intr23:
-	subq $8, %rsp
-	pushq $23
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $23
+    jmp intr_common_stub
 
 intr24:
-	subq $8, %rsp
-	pushq $24
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $24
+    jmp intr_common_stub
 
 intr25:
-	subq $8, %rsp
-	pushq $25
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $25
+    jmp intr_common_stub
 
 intr26:
-	subq $8, %rsp
-	pushq $26
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $26
+    jmp intr_common_stub
 
 intr27:
-	subq $8, %rsp
-	pushq $27
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $27
+    jmp intr_common_stub
 
 intr28:
-	subq $8, %rsp
-	pushq $28
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $28
+    jmp intr_common_stub
 
 intr29:
-	subq $8, %rsp
-	pushq $29
-	jmp intr_common_stub
+    subq $8, %rsp
+    pushq $29
+    jmp intr_common_stub
 
 intr30:
-	subq $8, %rsp
-	jmp intr_common_stub
+    subq $8, %rsp
+    jmp intr_common_stub
 
 intr31:
-	subq $8, %rsp
-	jmp intr_common_stub
+    subq $8, %rsp
+    jmp intr_common_stub
 
 intr_common_stub:
-	pushq %rax
+    pushq %rax
     pushq %rbx
     pushq %rcx
     pushq %rdx
@@ -202,7 +202,7 @@ intr_common_stub:
     pushq %r13
     pushq %r14
     pushq %r15
-	movq	%rsp, %rdi
+    movq    %rsp, %rdi
     cld
     call handler_interrupt
     popq %r15
@@ -220,5 +220,5 @@ intr_common_stub:
     popq %rcx
     popq %rbx
     popq %rax
-	addq $0x10, %rsp
+    addq $0x10, %rsp
     iretq

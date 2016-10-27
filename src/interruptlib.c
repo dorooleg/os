@@ -77,9 +77,9 @@ char *exception_messages[] =
 
 void handler_interrupt(struct regs * r)
 {
-	if (r->code < 32) {
-		write(exception_messages[r->code]);
-	}
+    if (r->code < 32) {
+        write(exception_messages[r->code]);
+    }
 }
 
 struct idt_entry idt[256];
@@ -92,7 +92,7 @@ void idt_set_gate(unsigned char num, unsigned long base, unsigned short sel, uns
     /* The interrupt routine's base address */
     idt[num].base_lo = (base & 0xFFFF);
     idt[num].base_hi = (base >> 16) & 0xFFFF;
-	idt[num].base_64 = (base >> 32) & 0xFFFFFFFF;
+    idt[num].base_64 = (base >> 32) & 0xFFFFFFFF;
 
     /* The segment or 'selector' that this IDT entry will use
     *  is set here, along with any access flags */
@@ -109,49 +109,49 @@ void idt_install()
     idtp.addr = (uint64_t)idt;
 
     /* Clear out the entire IDT, initializing it to zeros */
-	for (uint64_t i = 0; i < sizeof(struct idt_entry) * 256; i++) {
-		((char*)idt)[i] = 0;
-	}
+    for (uint64_t i = 0; i < sizeof(struct idt_entry) * 256; i++) {
+        ((char*)idt)[i] = 0;
+    }
 
     /* Add any new ISRs to the IDT here using idt_set_gate */
 
 
     /* Points the processor's internal register to the new IDT */
-	write_idtr(&idtp);
+    write_idtr(&idtp);
 }
 
 void intr_install()
 {
-	idt_set_gate(0,  (unsigned long)intr0,  KERNEL_CS, 0x8E);  
-	idt_set_gate(1,  (unsigned long)intr1,  KERNEL_CS, 0x8E);  
-	idt_set_gate(2,  (unsigned long)intr2,  KERNEL_CS, 0x8E);  
-	idt_set_gate(3,  (unsigned long)intr3,  KERNEL_CS, 0x8E);  
-	idt_set_gate(4,  (unsigned long)intr4,  KERNEL_CS, 0x8E);  
-	idt_set_gate(5,  (unsigned long)intr5,  KERNEL_CS, 0x8E);  
-	idt_set_gate(6,  (unsigned long)intr6,  KERNEL_CS, 0x8E);  
-	idt_set_gate(7,  (unsigned long)intr7,  KERNEL_CS, 0x8E);  
-	idt_set_gate(8,  (unsigned long)intr8,  KERNEL_CS, 0x8E);  
-	idt_set_gate(9,  (unsigned long)intr9,  KERNEL_CS, 0x8E);  
-	idt_set_gate(10, (unsigned long)intr10, KERNEL_CS, 0x8E);  
-	idt_set_gate(11, (unsigned long)intr11, KERNEL_CS, 0x8E);  
-	idt_set_gate(12, (unsigned long)intr12, KERNEL_CS, 0x8E);  
-	idt_set_gate(13, (unsigned long)intr13, KERNEL_CS, 0x8E);  
-	idt_set_gate(14, (unsigned long)intr14, KERNEL_CS, 0x8E);  
-	idt_set_gate(15, (unsigned long)intr15, KERNEL_CS, 0x8E);  
-	idt_set_gate(16, (unsigned long)intr16, KERNEL_CS, 0x8E);  
-	idt_set_gate(17, (unsigned long)intr17, KERNEL_CS, 0x8E);  
-	idt_set_gate(18, (unsigned long)intr18, KERNEL_CS, 0x8E);  
-	idt_set_gate(19, (unsigned long)intr19, KERNEL_CS, 0x8E);  
-	idt_set_gate(20, (unsigned long)intr20, KERNEL_CS, 0x8E);  
-	idt_set_gate(21, (unsigned long)intr21, KERNEL_CS, 0x8E);  
-	idt_set_gate(22, (unsigned long)intr22, KERNEL_CS, 0x8E);  
-	idt_set_gate(23, (unsigned long)intr23, KERNEL_CS, 0x8E);  
-	idt_set_gate(24, (unsigned long)intr24, KERNEL_CS, 0x8E);  
-	idt_set_gate(25, (unsigned long)intr25, KERNEL_CS, 0x8E);  
-	idt_set_gate(26, (unsigned long)intr26, KERNEL_CS, 0x8E);  
-	idt_set_gate(27, (unsigned long)intr27, KERNEL_CS, 0x8E);  
-	idt_set_gate(28, (unsigned long)intr28, KERNEL_CS, 0x8E);  
-	idt_set_gate(29, (unsigned long)intr29, KERNEL_CS, 0x8E);  
-	idt_set_gate(30, (unsigned long)intr30, KERNEL_CS, 0x8E);  
-	idt_set_gate(31, (unsigned long)intr31, KERNEL_CS, 0x8E);  
+    idt_set_gate(0,  (unsigned long)intr0,  KERNEL_CS, 0x8E);  
+    idt_set_gate(1,  (unsigned long)intr1,  KERNEL_CS, 0x8E);  
+    idt_set_gate(2,  (unsigned long)intr2,  KERNEL_CS, 0x8E);  
+    idt_set_gate(3,  (unsigned long)intr3,  KERNEL_CS, 0x8E);  
+    idt_set_gate(4,  (unsigned long)intr4,  KERNEL_CS, 0x8E);  
+    idt_set_gate(5,  (unsigned long)intr5,  KERNEL_CS, 0x8E);  
+    idt_set_gate(6,  (unsigned long)intr6,  KERNEL_CS, 0x8E);  
+    idt_set_gate(7,  (unsigned long)intr7,  KERNEL_CS, 0x8E);  
+    idt_set_gate(8,  (unsigned long)intr8,  KERNEL_CS, 0x8E);  
+    idt_set_gate(9,  (unsigned long)intr9,  KERNEL_CS, 0x8E);  
+    idt_set_gate(10, (unsigned long)intr10, KERNEL_CS, 0x8E);  
+    idt_set_gate(11, (unsigned long)intr11, KERNEL_CS, 0x8E);  
+    idt_set_gate(12, (unsigned long)intr12, KERNEL_CS, 0x8E);  
+    idt_set_gate(13, (unsigned long)intr13, KERNEL_CS, 0x8E);  
+    idt_set_gate(14, (unsigned long)intr14, KERNEL_CS, 0x8E);  
+    idt_set_gate(15, (unsigned long)intr15, KERNEL_CS, 0x8E);  
+    idt_set_gate(16, (unsigned long)intr16, KERNEL_CS, 0x8E);  
+    idt_set_gate(17, (unsigned long)intr17, KERNEL_CS, 0x8E);  
+    idt_set_gate(18, (unsigned long)intr18, KERNEL_CS, 0x8E);  
+    idt_set_gate(19, (unsigned long)intr19, KERNEL_CS, 0x8E);  
+    idt_set_gate(20, (unsigned long)intr20, KERNEL_CS, 0x8E);  
+    idt_set_gate(21, (unsigned long)intr21, KERNEL_CS, 0x8E);  
+    idt_set_gate(22, (unsigned long)intr22, KERNEL_CS, 0x8E);  
+    idt_set_gate(23, (unsigned long)intr23, KERNEL_CS, 0x8E);  
+    idt_set_gate(24, (unsigned long)intr24, KERNEL_CS, 0x8E);  
+    idt_set_gate(25, (unsigned long)intr25, KERNEL_CS, 0x8E);  
+    idt_set_gate(26, (unsigned long)intr26, KERNEL_CS, 0x8E);  
+    idt_set_gate(27, (unsigned long)intr27, KERNEL_CS, 0x8E);  
+    idt_set_gate(28, (unsigned long)intr28, KERNEL_CS, 0x8E);  
+    idt_set_gate(29, (unsigned long)intr29, KERNEL_CS, 0x8E);  
+    idt_set_gate(30, (unsigned long)intr30, KERNEL_CS, 0x8E);  
+    idt_set_gate(31, (unsigned long)intr31, KERNEL_CS, 0x8E);  
 }

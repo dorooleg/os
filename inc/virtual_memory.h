@@ -9,9 +9,9 @@
 #define MAX_MEMORY_MAP_SIZE 32
 #define PML3_MAX_SIZE 512
 #define GB1 0x40000000LL
-#define PTE_PRESENT	(1 << 0)
-#define PTE_WRITE	(1 << 1)
-#define PTE_LARGE	(1 << 7)
+#define PTE_PRESENT    (1 << 0)
+#define PTE_WRITE    (1 << 1)
+#define PTE_LARGE    (1 << 7)
 
 struct physical_memory_table
 {

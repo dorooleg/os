@@ -26,9 +26,9 @@ uint64_t* get_pml4(void)
     return bootstrap_pml4;
 }
 
-void map_1gb_page(uint64_t physical_address, uint64_t virtual_address)
+void map_1gb_page(uint64_t physical_address)
 {
-    uint64_t page_index = get_physical_address(virtual_address) / GB1;
+    uint64_t page_index = physical_address / GB1;
     uint64_t pml3_index = page_index / PML3_MAX_SIZE + PML3_MAX_SIZE / 2;
     page_index %= PML3_MAX_SIZE; 
     pml3_table[pml3_index][page_index] = physical_address | PTE_WRITE |  PTE_PRESENT | PTE_LARGE;  
@@ -45,7 +45,7 @@ void setup_mapping(void)
     }
 
     for (uint32_t i = 0; i < max_number_page; i++) {
-        map_1gb_page(i * GB1, i * GB1 + VIRTUAL_OFFSET); 
+        map_1gb_page(i * GB1); 
     }
 }
 
@@ -53,9 +53,15 @@ uint64_t get_physical_segment(uint64_t size)
 {
     multiboot_memory_map_t * mmap = physical_memory_table.table;
     for (uint32_t i = 0; i < physical_memory_table.size; i++) {
-        if (mmap[i].len >= size && mmap[i].type == MULTIBOOT_MEMORY_AVAILABLE) {
+        uint64_t l = mmap[i].addr;
+        uint64_t r = mmap[i].addr + mmap[i].len;
+        r = r > (GB1 << 2) ? (GB1 << 2) : r;
+        if (mmap[i].addr % PAGE_SIZE != 0) {
+            l = mmap[i].addr + (PAGE_SIZE - mmap[i].addr % PAGE_SIZE);
+        }
+        if (r > l && r - l >= size && mmap[i].type == MULTIBOOT_MEMORY_AVAILABLE) {
             uint64_t addr = mmap[i].addr;
-            reserve_physical_memory(mmap[i].addr, mmap[i].addr + size);
+            reserve_physical_memory(l, l + size);
             return addr;
         } 
     }

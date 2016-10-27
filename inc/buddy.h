@@ -7,11 +7,19 @@ struct buddy_node_t
 {
     uint64_t mask_end;
     uint64_t mask;
-    uint32_t next;
+    uint64_t next;
+    uint64_t prev;
+    uint64_t head;
     char     is_valid;
 };
-
 typedef struct buddy_node_t buddy_node;
+
+struct buddy_stair_t
+{
+    buddy_node* next;
+};
+typedef struct buddy_stair_t buddy_stair;
+
 
 void setup_buddy(void);
 uint64_t alloc_buddy(uint32_t size);
