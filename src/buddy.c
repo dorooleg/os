@@ -170,7 +170,7 @@ uint64_t alloc_buddy(uint32_t size)
 {
     uint64_t exp = 1;
     uint8_t level = 1;
-    while (exp < size) {
+    while (exp * BLOCK_SIZE < size ) {
         exp <<= 2;
         level++;
     }

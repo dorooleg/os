@@ -1,16 +1,18 @@
+#include <printf.h>
 #include <slab.h>
 #include <buddy.h>
 #include <memory.h>
 #include <printf.h>
+#include <pagea.h>
 
 static char reserve_slab(slab_metadata* metadata)
 {
-    metadata->sharing = (void*)alloc_buddy(PAGE_SIZE); 
+    metadata->sharing = pagea_alloc(1);//(void*)alloc_buddy(PAGE_SIZE); 
     if (metadata->sharing == 0) {
         return 0;
     }
 
-    metadata->next = (slab_node*)alloc_buddy(PAGE_SIZE);
+    metadata->next = pagea_alloc(1);//(slab_node*)alloc_buddy(PAGE_SIZE);
     if (metadata->next == 0) {
         return 0;
     }

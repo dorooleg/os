@@ -22,9 +22,11 @@ static void qemu_gdb_hang(void)
 #include <multiboot.h>
 #include <virtual_memory.h>
 #include <buddy.h>
-#include <slab.h>
+//#include <slab.h>
 #include <malloc.h>
 #include <memory.h>
+#include <pagea.h>
+#include <fast_slab.h>
 
 extern uintptr_t text_phys_begin[];
 extern uintptr_t bss_phys_begin[];
@@ -43,6 +45,51 @@ void foo2()
     backtrace();
 }
 
+void test_buddy(void)
+{
+    unsigned long count = 0;
+
+    while (1) {
+        void *ptr;
+
+        if (!(ptr = pagea_alloc(1)))
+            break;
+    //    printf("returned %x\n", ptr);
+        ++count;
+    }
+    printf("allocated %ld\n", count);
+}
+
+void test_slab(void)
+{
+    unsigned long count = 0;
+
+    fast_slab_metadata slab = create_fast_slab_allocator(16);
+    while (1) {
+        void *ptr;
+
+        if (!(ptr = alloc_fast_slab(&slab)))
+            break;
+        ++count;
+        if (count > 1000) {
+            break;
+        }
+    }
+    printf("allocated %ld\n", count);
+}
+
+void test_buddy2(void)
+{
+    for (int i = 0; i < 1024; i++) {
+        void *ptr;
+
+        if (!(ptr = pagea_alloc(1)))
+            break;
+        pagea_free(ptr);
+    }
+}
+
+extern buddy_node* buddy_table;
 void main(void)
 {
     qemu_gdb_hang();
@@ -68,17 +115,56 @@ void main(void)
     print_multiboot_info();
     setup_memory();
     print_physical_memory_table();
+
+/*
+    setup_buddy();
+    void *p = (void*)alloc_buddy(67);
+    printf("%x\n", p);
+    uint64_t page_index = get_physical_address((uint64_t)p) / PAGE_SIZE;  
+    printf("[%x]", buddy_table[page_index].mask);   
+  
+    printf("%x\n", alloc_buddy(1));
+*/  
+
     setup_mapping();    
     print_physical_memory_table();
-    setup_buddy();
-    print_physical_memory_table();
+    setup_pagea();
+    
+    fast_slab_metadata slab = create_fast_slab_allocator(16);
+    void *ptr = alloc_fast_slab(&slab);
+    printf("%x\n", ptr);
+    void *ptr1 = alloc_fast_slab(&slab);
+    printf("%x\n", ptr1);
+    void *ptr2 = alloc_fast_slab(&slab);
+    printf("%x\n", ptr2);
+    free_fast_slab(&slab, ptr2);
+    void *ptr3 = alloc_fast_slab(&slab);
+    printf("%x\n", ptr3);
 
+    test_slab();
+/*
+    print_stair();
+*/
+//    test_buddy();
+
+    //test_buddy2();
+    //print_stair();
+
+#if 0
+    void * p = pagea_alloc(2048); 
+    print_stair();
+    pagea_free(p);
+    //printf("%x\n", p);
+    print_stair();
+    //setup_buddy();
+    //print_physical_memory_table();
+/*
     {
-        uint64_t* arr = (uint64_t*)alloc_buddy(129);
+        uint64_t* arr = (uint64_t*)alloc_buddy(1);
         printf("%x\n", arr);
-        arr = (uint64_t*)alloc_buddy(2);
+        arr = (uint64_t*)alloc_buddy(4);
         printf("%x\n", arr);
-        arr = (uint64_t*)alloc_buddy(2);
+        arr = (uint64_t*)alloc_buddy(4);
         printf("%x\n", arr);
         arr = (uint64_t*)alloc_buddy(PAGE_SIZE);
         printf("%x\n", arr);
@@ -132,6 +218,7 @@ void main(void)
     free(big_fib);
     big_fib = (uint64_t*)malloc(4096 * sizeof(uint64_t));
     printf("big_fib = %x\n", big_fib);
-    
+*/
+#endif
     while (1);
 }

@@ -1,3 +1,5 @@
+#include <printf.h>
+/*
 #include <malloc.h>
 #include <slab.h>
 #include <buddy.h>
@@ -105,3 +107,4 @@ void free(void* addr)
         }
     }
 }
+*/
