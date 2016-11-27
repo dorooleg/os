@@ -10,7 +10,9 @@
 #include <pitlib.h>
 
 uint64_t gtid;
-struct spinlock thread_lock;
+
+struct spinlock multithreading_lock;
+
 static list_t * init_threads = NULL;
 list_t * running_threads = NULL;
 static list_t * terminated_threads = NULL;
@@ -59,7 +61,7 @@ void threads_init()
 
 struct thread_t* thread_create(void *(*start_routine)(void *), void *arg)
 {
-    disable_ints();
+    lock(&multithreading_lock);
     struct thread_t * thread = alloc_fast_slab_concurrent(&thread_t_allocator);
     thread->sp = pagea_alloc_concurrent(THREAD_MAX_STACK_SIZE);
     thread->stack_size = THREAD_MAX_STACK_SIZE;
@@ -69,39 +71,37 @@ struct thread_t* thread_create(void *(*start_routine)(void *), void *arg)
     thread->status = INIT;
     thread->tid = gtid++;
     list_push_front(&init_threads, thread);
-    enable_ints();
+    unlock(&multithreading_lock);
     return thread;
 }
 
 void thread_terminate()
 {
-    disable_ints();
+    lock(&multithreading_lock);
     current_thread->status = TERMINATED;
     list_push_back(&terminated_threads, current_thread);
     p_tid = current_thread->tid;
     list_remove_first(&running_threads, predicate_tid, nothing);
     thread_yield();
-    enable_ints();
+    unlock(&multithreading_lock);
 }
 
 void thread_start(struct thread_t* thread)
 {
-    disable_ints();
+    lock(&multithreading_lock);
     list_push_back(&running_threads, thread);
     p_tid = thread->tid;
     list_remove_first(&init_threads, predicate_tid, nothing);
-    enable_ints();
+    unlock(&multithreading_lock);
 }
 
 void thread_join(struct thread_t* thread, void** result)
 {
-    disable_ints();
     while (thread->status != TERMINATED) {
         thread_yield();
         __asm__ volatile ("" : : : "memory");
     }
     *result = thread->result;
-    enable_ints();
 }
 
 
