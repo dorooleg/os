@@ -2,6 +2,9 @@
 #include <virtual_memory.h>
 #include <memory.h>
 #include <printf.h>
+#include <spinlock.h>
+
+struct spinlock memory_lock;
 
 buddy_node* buddy_table;
 buddy_stair* _buddy_stair;
@@ -227,4 +230,19 @@ void free_buddy(uint64_t* addr)
         head->head = (uint64_t)(_buddy_stair + new_level);
         _buddy_stair[new_level].next = head;
     }
+}
+
+uint64_t alloc_buddy_concurrent(uint32_t size)
+{
+    lock(&memory_lock);
+    uint64_t ptr = alloc_buddy(size); 
+    unlock(&memory_lock);
+    return ptr;
+}
+
+void free_buddy_concurrent(uint64_t* addr)
+{
+    lock(&memory_lock);
+    free_buddy(addr);
+    unlock(&memory_lock);
 }

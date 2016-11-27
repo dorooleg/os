@@ -2,6 +2,7 @@
 #include <iolib.h>
 #include <ioport.h>
 #include <pitlib.h>
+#include <thread.h>
 
 void pit_init()
 {
@@ -11,7 +12,13 @@ void pit_init()
 void timer_handler(struct regs *r)
 {
     (void)r;
-    write("Timer call\n");
+    if (r->code >= 40)
+    {
+        out8(0xA0, 0x20);
+    }
+
+    out8(0x20, 0x20);
+    thread_yield();
 }
 
 void timer_init()

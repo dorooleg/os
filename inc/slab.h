@@ -24,4 +24,8 @@ slab_metadata create_slab_allocator(uint64_t block_size);
 void* alloc_slab(slab_metadata* metadata);
 void free_slab(slab_metadata * metadata, void* addr);
 
+slab_metadata create_slab_allocator_concurrent(uint64_t block_size);
+void* alloc_slab_concurrent(slab_metadata* metadata);
+void free_slab_concurrent(slab_metadata * metadata, void* addr);
+
 #endif //__SLAB_H__

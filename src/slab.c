@@ -4,6 +4,9 @@
 #include <memory.h>
 #include <printf.h>
 #include <pagea.h>
+#include <spinlock.h>
+
+extern struct spinlock memory_lock;
 
 static char reserve_slab(slab_metadata* metadata)
 {
@@ -86,4 +89,27 @@ void free_slab(slab_metadata * metadata, void* addr)
 
         root = metadata->reserve;
     }
+}
+
+slab_metadata create_slab_allocator_concurrent(uint64_t block_size)
+{
+    lock(&memory_lock);
+    slab_metadata meta = create_slab_allocator(block_size);
+    unlock(&memory_lock);
+    return meta;
+}
+
+void* alloc_slab_concurrent(slab_metadata* metadata)
+{
+    lock(&memory_lock);
+    void* ptr = alloc_slab(metadata); 
+    unlock(&memory_lock);
+    return ptr;
+}
+
+void free_slab_concurrent(slab_metadata * metadata, void* addr)
+{
+    lock(&memory_lock);
+    free_slab(metadata, addr);
+    unlock(&memory_lock);
 }

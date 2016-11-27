@@ -2,6 +2,9 @@
 #include <virtual_memory.h>
 #include <memory.h>
 #include <printf.h>
+#include <spinlock.h>
+
+extern struct spinlock memory_lock;
 
 pagea_node*  _pagea_table;
 pagea_stair* _pagea_stair;
@@ -248,4 +251,19 @@ void print_stair(void)
         } 
         printf("\n");
     }
+}
+
+void* pagea_alloc_concurrent(uint64_t numer_pages)
+{
+    lock(&memory_lock);
+    void *p = pagea_alloc(numer_pages);
+    unlock(&memory_lock);
+    return p;
+}
+
+void pagea_free_concurrent(void* p)
+{
+    lock(&memory_lock);
+    pagea_free(p);
+    unlock(&memory_lock);
 }

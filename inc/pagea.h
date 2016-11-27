@@ -34,4 +34,7 @@ void pagea_free(void* p);
 void erase_page(uint64_t page_id);
 void insert_page(uint64_t page_id, uint64_t level);
 
+void* pagea_alloc_concurrent(uint64_t numer_pages);
+void pagea_free_concurrent(void* p);
+
 #endif //__PAGEA_H__

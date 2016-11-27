@@ -1,6 +1,9 @@
 #include <fast_slab.h>
 #include <pagea.h>
 #include <memory.h>
+#include <spinlock.h>
+
+extern struct spinlock memory_lock;
 
 fast_slab_metadata create_fast_slab_allocator(uint64_t block_size)
 {
@@ -53,4 +56,27 @@ void free_fast_slab(fast_slab_metadata * metadata, void* addr)
     }
     *((uint64_t*)addr) = (uint64_t)metadata->next;
     metadata->next = addr;
+}
+
+void* alloc_fast_slab_concurrent(fast_slab_metadata* metadata)
+{
+    lock(&memory_lock);
+    void* ptr = alloc_fast_slab(metadata);
+    unlock(&memory_lock);
+    return ptr;
+}
+
+void free_fast_slab_concurrent(fast_slab_metadata * metadata, void* addr)
+{
+    lock(&memory_lock);
+    free_fast_slab(metadata, addr);
+    unlock(&memory_lock);
+}
+
+fast_slab_metadata create_fast_slab_allocator_concurrent(uint64_t block_size)
+{
+    lock(&memory_lock);
+    fast_slab_metadata meta = create_fast_slab_allocator(block_size);
+    unlock(&memory_lock);
+    return meta;
 }
