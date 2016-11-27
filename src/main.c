@@ -21,7 +21,6 @@ static void qemu_gdb_hang(void)
 #include <ints.h>
 #include <multiboot.h>
 #include <virtual_memory.h>
-#include <buddy.h>
 #include <malloc.h>
 #include <memory.h>
 #include <pagea.h>

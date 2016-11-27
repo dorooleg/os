@@ -4,7 +4,7 @@
 #include <printf.h>
 #include <spinlock.h>
 
-extern struct spinlock memory_lock;
+static struct spinlock memory_lock;
 
 pagea_node*  _pagea_table;
 pagea_stair* _pagea_stair;

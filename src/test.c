@@ -6,8 +6,12 @@
 #include <stdint.h>
 #include <thread.h>
 #include <ints.h>
+#include <mutex.h>
 
 #define NULL 0
+
+extern int counter_threads;
+void print_thread(void* value);
 
 static fast_slab_metadata test_allocator;  
 
@@ -304,6 +308,43 @@ void scheduler_test1()
     thread_destroy(t2);
 } 
 
+struct mutex_t global_mutex;
+static void* mutex_func(void* arg)
+{
+    (void)arg;
+    int n = 0;
+    mutex_lock(&global_mutex);
+    while (1) {
+        n++;
+        if (n % DELAY == 0) {
+            counter_threads = 0;
+            list_map(&global_mutex.locked_threads, print_thread);    
+            printf("mutex\n");
+            n = 0;
+            break;
+        } 
+    }
+    mutex_unlock(&global_mutex);
+    return 0;
+}
+
+void mutex_test()
+{
+    struct thread_t* t1 = thread_create(mutex_func, NULL);
+    struct thread_t* t2 = thread_create(mutex_func, NULL);
+
+    thread_start(t2);
+    thread_start(t1);
+    print_thread_statistics();
+
+    while (1) {
+        __asm__ volatile ("" : : : "memory");
+    }
+
+    thread_destroy(t1);
+    thread_destroy(t2);
+}
+
 void test_main()
 {
     test_allocator = create_fast_slab_allocator_concurrent(sizeof(uint64_t));
@@ -315,5 +356,6 @@ void test_main()
     test_list5();
     print_init_threads();
     thread_test1();
+    mutex_test();
 //    scheduler_test1();
 }

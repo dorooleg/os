@@ -1,5 +1,4 @@
 #include <thread.h>
-#include <buddy.h>
 #include <list.h>
 #include <memory.h>
 #include <spinlock.h>
@@ -13,10 +12,10 @@
 uint64_t gtid;
 struct spinlock thread_lock;
 static list_t * init_threads = NULL;
-static list_t * running_threads = NULL;
+list_t * running_threads = NULL;
 static list_t * terminated_threads = NULL;
 static struct thread_t* volatile current_thread = NULL;
-static fast_slab_metadata thread_t_allocator;  
+fast_slab_metadata thread_t_allocator;  
 
 static void nothing(void *data) { (void)data; }
 
@@ -30,11 +29,11 @@ static char predicate_tid(void* value)
     return 0;
 }
 
-static int counter;
-static void print_thread(void* value)
+int counter_threads;
+void print_thread(void* value)
 {
     struct thread_t *thread = value;
-    printf("%i: ", counter++);
+    printf("%i: ", counter_threads++);
     printf("TID = %lli, SP = %p, STATUS = ", thread->tid, thread->sp);
     switch (thread->status)
     {
@@ -108,6 +107,17 @@ void thread_join(struct thread_t* thread, void** result)
 
 void switch_context(struct thread_t * new_thread, struct thread_t *volatile* old_thread);
 
+void mutex_thread_yield()
+{
+    disable_ints();
+    if (current_thread != NULL) {
+        struct thread_t* thread = list_top(&running_threads)->value;
+        list_pop_front(&running_threads, nothing);
+        switch_context(thread, &current_thread);
+    }
+    enable_ints();
+}
+
 void thread_yield()
 {
     disable_ints();
@@ -158,20 +168,20 @@ void print_current_thread()
 void print_init_threads()
 {
     printf("Init threads\n");
-    counter = 0;
+    counter_threads = 0;
     list_map(&init_threads, print_thread);    
 }
 
 void print_running_threads()
 {
     printf("Running threads\n");
-    counter = 0;
+    counter_threads = 0;
     list_map(&running_threads, print_thread);    
 }
 
 void print_terminated_threads()
 {
     printf("Terminated threads\n");
-    counter = 0;
+    counter_threads = 0;
     list_map(&terminated_threads, print_thread);    
 }

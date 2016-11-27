@@ -36,6 +36,8 @@ void thread_join(struct thread_t* thread, void** result);
 
 void thread_yield();
 
+void mutex_thread_yield();
+
 struct thread_t* thread_get_current();
 
 void print_current_thread();

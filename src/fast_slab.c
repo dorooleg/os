@@ -3,12 +3,12 @@
 #include <memory.h>
 #include <spinlock.h>
 
-extern struct spinlock memory_lock;
 
 fast_slab_metadata create_fast_slab_allocator(uint64_t block_size)
 {
     fast_slab_metadata metadata; 
     metadata.next = 0;
+    metadata.memory_lock.locked = 0;
     metadata.block_size = block_size < 8 ? 8 : block_size;
     return metadata;
 }
@@ -60,23 +60,21 @@ void free_fast_slab(fast_slab_metadata * metadata, void* addr)
 
 void* alloc_fast_slab_concurrent(fast_slab_metadata* metadata)
 {
-    lock(&memory_lock);
+    lock(&metadata->memory_lock);
     void* ptr = alloc_fast_slab(metadata);
-    unlock(&memory_lock);
+    unlock(&metadata->memory_lock);
     return ptr;
 }
 
 void free_fast_slab_concurrent(fast_slab_metadata * metadata, void* addr)
 {
-    lock(&memory_lock);
+    lock(&metadata->memory_lock);
     free_fast_slab(metadata, addr);
-    unlock(&memory_lock);
+    unlock(&metadata->memory_lock);
 }
 
 fast_slab_metadata create_fast_slab_allocator_concurrent(uint64_t block_size)
 {
-    lock(&memory_lock);
     fast_slab_metadata meta = create_fast_slab_allocator(block_size);
-    unlock(&memory_lock);
     return meta;
 }

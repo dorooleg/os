@@ -2,10 +2,12 @@
 #define __FAST_SLAB_H__
 
 #include <stdint.h>
+#include <spinlock.h>
 
 typedef struct fast_slab_metadata_t fast_slab_metadata;
 struct fast_slab_metadata_t
 {
+    struct spinlock memory_lock;
     void*           next; 
     uint64_t        block_size;
 };
