@@ -82,7 +82,7 @@ void thread_terminate()
     list_push_back(&terminated_threads, current_thread);
     p_tid = current_thread->tid;
     list_remove_first(&running_threads, predicate_tid, nothing);
-    thread_yield();
+    unsafe_thread_yield();
     unlock(&multithreading_lock);
 }
 
@@ -109,18 +109,16 @@ void switch_context(struct thread_t * new_thread, struct thread_t *volatile* old
 
 void mutex_thread_yield()
 {
-    disable_ints();
+    lock(&multithreading_lock);
     if (current_thread != NULL) {
         struct thread_t* thread = list_top(&running_threads)->value;
         list_pop_front(&running_threads, nothing);
         switch_context(thread, &current_thread);
     }
-    enable_ints();
 }
 
-void thread_yield()
+void unsafe_thread_yield()
 {
-    disable_ints();
     if (current_thread != NULL && current_thread->status == RUNNING) {
         list_push_back(&running_threads, current_thread);
     }
@@ -130,17 +128,26 @@ void thread_yield()
         list_pop_front(&running_threads, nothing);
         switch_context(thread, &current_thread);
     }
-    enable_ints();
+    else
+    {
+        unlock(&multithreading_lock);
+    }
+}
+
+void thread_yield()
+{
+    lock(&multithreading_lock);
+    unsafe_thread_yield();
 }
 
 void thread_destroy(struct thread_t* thread)
 {
-    disable_ints();
+    lock(&multithreading_lock);
     pagea_free_concurrent(thread->sp);
     p_tid = thread->tid;
     list_remove_first(&terminated_threads, predicate_tid, nothing);
     list_remove_first(&running_threads, predicate_tid, nothing);
-    enable_ints();
+    unlock(&multithreading_lock);
 }
 
 void execute(struct thread_t* thread)
@@ -148,9 +155,13 @@ void execute(struct thread_t* thread)
     if (thread->status == INIT)
     {
         thread->status = RUNNING;
-        enable_ints();
+        unlock(&multithreading_lock);
         thread->result = thread->start_routine(thread->arg);
         thread_terminate();
+    }
+    else
+    {
+        unlock(&multithreading_lock);
     }
 }
 

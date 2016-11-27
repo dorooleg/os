@@ -35,6 +35,7 @@ void thread_destroy(struct thread_t* thread);
 void thread_join(struct thread_t* thread, void** result);
 
 void thread_yield();
+void unsafe_thread_yield();
 
 void mutex_thread_yield();
 

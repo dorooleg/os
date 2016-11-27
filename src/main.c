@@ -64,7 +64,6 @@ void main(void)
     setup_pagea();
     list_init();
     threads_init();
-    disable_ints();
     enable_ints();
     test_main();
     while (1);
