@@ -8,6 +8,7 @@
 #include <interruptlib.h>
 #include <ints.h>
 #include <pitlib.h>
+#include <ioport.h>
 
 uint64_t gtid;
 
@@ -63,7 +64,18 @@ struct thread_t* thread_create(void *(*start_routine)(void *), void *arg)
 {
     lock(&multithreading_lock);
     struct thread_t * thread = alloc_fast_slab_concurrent(&thread_t_allocator);
-    thread->sp = pagea_alloc_concurrent(THREAD_MAX_STACK_SIZE);
+    thread->stack_head = pagea_alloc_concurrent(THREAD_MAX_STACK_SIZE);
+    thread->sp = (uint8_t*)thread->stack_head + THREAD_MAX_STACK_SIZE * PAGE_SIZE - 1;
+    thread->sp = (uint8_t*)thread->sp - sizeof(struct thread_frame);
+    struct thread_frame * frame = thread->sp;
+    frame->rflags = 0;
+    frame->r15 = 0;
+    frame->r13 = 0;
+    frame->r12 = 0;
+    frame->rbp = 0;
+    frame->rbx = 0;
+    frame->rdi = (uint64_t)thread;
+    frame->rip = (uint64_t)main_thread;
     thread->stack_size = THREAD_MAX_STACK_SIZE;
     thread->start_routine = start_routine;
     thread->arg = arg;
@@ -82,8 +94,8 @@ void thread_terminate()
     list_push_back(&terminated_threads, current_thread);
     p_tid = current_thread->tid;
     list_remove_first(&running_threads, predicate_tid, nothing);
-    unsafe_thread_yield();
     unlock(&multithreading_lock);
+    thread_yield();
 }
 
 void thread_start(struct thread_t* thread)
@@ -105,7 +117,7 @@ void thread_join(struct thread_t* thread, void** result)
 }
 
 
-void switch_context(struct thread_t * new_thread, struct thread_t *volatile* old_thread);
+void switch_thread(void **prev, void *next);
 
 void mutex_thread_yield()
 {
@@ -113,11 +125,14 @@ void mutex_thread_yield()
     if (current_thread != NULL) {
         struct thread_t* thread = list_top(&running_threads)->value;
         list_pop_front(&running_threads, nothing);
-        switch_context(thread, &current_thread);
+        unlock(&multithreading_lock);
+        struct thread_t * old_thread = current_thread;
+        current_thread = thread;
+        switch_thread(&old_thread->sp, &thread->sp);
     }
 }
 
-void unsafe_thread_yield()
+void thread_yield()
 {
     if (current_thread != NULL && current_thread->status == RUNNING) {
         list_push_back(&running_threads, current_thread);
@@ -126,18 +141,15 @@ void unsafe_thread_yield()
     if (current_thread != NULL) {
         struct thread_t* thread = list_top(&running_threads)->value;
         list_pop_front(&running_threads, nothing);
-        switch_context(thread, &current_thread);
+        struct thread_t * old_thread = current_thread;
+        current_thread = thread;
+        disable_ints();
+        switch_thread(&old_thread->sp, &thread->sp);
     }
     else
     {
         unlock(&multithreading_lock);
     }
-}
-
-void thread_yield()
-{
-    lock(&multithreading_lock);
-    unsafe_thread_yield();
 }
 
 void thread_destroy(struct thread_t* thread)
@@ -150,18 +162,14 @@ void thread_destroy(struct thread_t* thread)
     unlock(&multithreading_lock);
 }
 
-void execute(struct thread_t* thread)
+void main_thread(struct thread_t* thread)
 {
     if (thread->status == INIT)
     {
         thread->status = RUNNING;
-        unlock(&multithreading_lock);
+        thread_yield();
         thread->result = thread->start_routine(thread->arg);
         thread_terminate();
-    }
-    else
-    {
-        unlock(&multithreading_lock);
     }
 }
 

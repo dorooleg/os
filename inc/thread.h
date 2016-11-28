@@ -13,9 +13,11 @@ typedef enum
 } thread_status;
 
 
+
 struct thread_t
 {
     void            *sp;
+    void            *stack_head;
     void*           (*start_routine)(void*);
     void            *result;
     void            *arg;
@@ -23,6 +25,19 @@ struct thread_t
     thread_status   status;
     uint64_t        tid;
 };
+
+struct thread_frame
+{
+    uint64_t rflags;
+    uint64_t r15;
+    uint64_t r14;
+    uint64_t r13;
+    uint64_t r12;
+    uint64_t rbp;
+    uint64_t rbx;
+    uint64_t rdi;
+    uint64_t rip;
+} __attribute__((packed));
 
 void threads_init();
 
@@ -35,7 +50,6 @@ void thread_destroy(struct thread_t* thread);
 void thread_join(struct thread_t* thread, void** result);
 
 void thread_yield();
-void unsafe_thread_yield();
 
 void mutex_thread_yield();
 
@@ -48,6 +62,8 @@ void print_init_threads();
 void print_running_threads();
 
 void print_terminated_threads();
+
+void main_thread(struct thread_t* thread);
 
 #endif //__THREAD_H__
 

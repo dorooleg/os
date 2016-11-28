@@ -7,6 +7,7 @@
 #include <thread.h>
 #include <ints.h>
 #include <mutex.h>
+#include <ioport.h>
 
 #define NULL 0
 
@@ -246,11 +247,12 @@ void thread_test1()
     thread_start(t2);
     thread_start(t1);
 
+    printf("-----> Start(*) <----\n");
     print_thread_statistics();
 
+    printf("-----> Join <----\n");
     void* res;
     thread_join(t2, &res);
-    printf("-----> Join <----\n");
     print_thread_statistics();
 
     thread_destroy(t1);
@@ -291,13 +293,29 @@ static void* massiv_calc2(void* arg)
     return 0;
 }
 
+static void* massiv_calc3(void* arg)
+{
+    (void)arg;
+    int n = 0;
+    while (1) {
+        n++;
+        if (n % DELAY == 0) {
+            printf("massiv_calc3\n");
+            n = 0;
+        } 
+    }
+    return 0;
+}
+
 void scheduler_test1()
 {
     struct thread_t* t1 = thread_create(massiv_calc1, NULL);
     struct thread_t* t2 = thread_create(massiv_calc2, NULL);
+    struct thread_t* t3 = thread_create(massiv_calc3, NULL);
 
     thread_start(t2);
     thread_start(t1);
+    thread_start(t3);
     print_thread_statistics();
 
     while (1) {
@@ -306,6 +324,7 @@ void scheduler_test1()
 
     thread_destroy(t1);
     thread_destroy(t2);
+    thread_destroy(t3);
 } 
 
 struct mutex_t global_mutex;
@@ -317,6 +336,9 @@ static void* mutex_func(void* arg)
     while (1) {
         n++;
         if (n % DELAY == 0) {
+            out8(0xA0, 0x20);
+            out8(0x20, 0x20);
+            enable_ints();
             counter_threads = 0;
             list_map(&global_mutex.locked_threads, print_thread);    
             printf("mutex\n");
@@ -356,6 +378,6 @@ void test_main()
     test_list5();
     print_init_threads();
     thread_test1();
-    mutex_test();
+//    mutex_test();
 //    scheduler_test1();
 }

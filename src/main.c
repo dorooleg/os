@@ -37,7 +37,7 @@ extern uintptr_t data_phys_end[];
 
 void main(void)
 {
-    disable_ints();
+    //disable_ints();
     qemu_gdb_hang();
     init_io();
     idt_install();
@@ -64,6 +64,7 @@ void main(void)
     setup_pagea();
     list_init();
     threads_init();
+//    disable_ints();
     enable_ints();
     test_main();
     while (1);
