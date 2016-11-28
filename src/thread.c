@@ -134,6 +134,7 @@ void mutex_thread_yield()
 
 void thread_yield()
 {
+    lock(&multithreading_lock);
     if (current_thread != NULL && current_thread->status == RUNNING) {
         list_push_back(&running_threads, current_thread);
     }
@@ -143,6 +144,7 @@ void thread_yield()
         list_pop_front(&running_threads, nothing);
         struct thread_t * old_thread = current_thread;
         current_thread = thread;
+        unlock(&multithreading_lock);
         disable_ints();
         switch_thread(&old_thread->sp, &thread->sp);
     }
