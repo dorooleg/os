@@ -369,6 +369,7 @@ void mutex_test()
 
 void test_main()
 {
+    printf("***TESTS BEGIN\n***");
     test_allocator = create_fast_slab_allocator_concurrent(sizeof(uint64_t));
     test_list_empty();
     test_list1();

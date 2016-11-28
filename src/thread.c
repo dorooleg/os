@@ -132,8 +132,24 @@ void mutex_thread_yield()
     }
 }
 
+void thread_yield_interrupt()
+{
+    if (current_thread != NULL && current_thread->status == RUNNING) {
+        list_push_back(&running_threads, current_thread);
+    }
+
+    if (current_thread != NULL) {
+        struct thread_t* thread = list_top(&running_threads)->value;
+        list_pop_front(&running_threads, nothing);
+        struct thread_t * old_thread = current_thread;
+        current_thread = thread;
+        switch_thread(&old_thread->sp, &thread->sp);
+    }
+}
+
 void thread_yield()
 {
+    disable_ints();
     lock(&multithreading_lock);
     if (current_thread != NULL && current_thread->status == RUNNING) {
         list_push_back(&running_threads, current_thread);
@@ -145,19 +161,19 @@ void thread_yield()
         struct thread_t * old_thread = current_thread;
         current_thread = thread;
         unlock(&multithreading_lock);
-        disable_ints();
         switch_thread(&old_thread->sp, &thread->sp);
     }
     else
     {
         unlock(&multithreading_lock);
+        enable_ints();
     }
 }
 
 void thread_destroy(struct thread_t* thread)
 {
     lock(&multithreading_lock);
-    pagea_free_concurrent(thread->sp);
+    pagea_free_concurrent(thread->stack_head);
     p_tid = thread->tid;
     list_remove_first(&terminated_threads, predicate_tid, nothing);
     list_remove_first(&running_threads, predicate_tid, nothing);
@@ -169,7 +185,6 @@ void main_thread(struct thread_t* thread)
     if (thread->status == INIT)
     {
         thread->status = RUNNING;
-        thread_yield();
         thread->result = thread->start_routine(thread->arg);
         thread_terminate();
     }

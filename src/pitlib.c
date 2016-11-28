@@ -13,14 +13,14 @@ void pit_init()
 void timer_handler(struct regs *r)
 {
     (void)r;
-//    write("TIMER\n");
+    //write("TIMER\n");
     if (r->code >= 40)
     {
         out8(0xA0, 0x20);
     }
 
     out8(0x20, 0x20);
-    thread_yield();
+    thread_yield_interrupt();
 }
 
 void timer_init()
