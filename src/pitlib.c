@@ -25,6 +25,7 @@ void timer_handler(struct regs *r)
     out8(0x20, 0x20);
     if (try_lock(&multithreading_lock)) {
         thread_yield_interrupt();
+        __asm__ volatile ("" : : : "memory");
     }
 }
 

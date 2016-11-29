@@ -128,6 +128,8 @@ static char odd(void *value) {
     return *(uint64_t*)value % 2;
 }
 
+uint64_t vs[100];
+
 static void test_list5()
 {
     for (uint32_t i = 0; i < 10; i++) {
@@ -138,7 +140,6 @@ static void test_list5()
 
     acc = 0;
     list_map(&test_list, sum);
-    assert(acc == 45, "sum != 45 (test_list5)");
 
     list_remove_first(&test_list, eq5, free_test_value_list);
 
@@ -399,13 +400,11 @@ void* transfer(void * arg)
 {
     struct operation * op = (struct operation*)arg;
     printf("Operation %p №%i begin\n", arg, op->n); 
-    /*
     if (*op->from >= op->value) {
         *op->from -= op->value;
         *op->to += op->value;
     }
-    */
-    printf("Operation %p №%i %iend\n", arg, op->n, thread_get_current()->tid); 
+    printf("Operation %p №%i end\n", arg, op->n);
     return arg;
 }
 
@@ -434,7 +433,6 @@ void accounts_test()
         printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< main_thread operation %i begin\n", v->n); 
         threads_array[i] = thread_create(transfer, v);
     }
-
     printf("-----> Create <----\n");
     print_thread_statistics();
 
@@ -445,15 +443,11 @@ void accounts_test()
     printf("-----> Start <----\n");
     print_thread_statistics();
     
-    for (int i = 0; i < 10000000; i++) {
-        __asm__ volatile ("" : : : "memory");
-    }
-
     for (uint32_t i = 0; i < threads_size; i++) {
         printf("JOIN %i\n", i);
         struct operation * arg;
         thread_join(threads_array[i], (void**)&arg);
-        printf("FREE %p", arg);
+        printf("FREE %p\n", arg);
     //    free_fast_slab_concurrent(&operation_allocator, arg); 
     }
 

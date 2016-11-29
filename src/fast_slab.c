@@ -16,12 +16,13 @@ fast_slab_metadata create_fast_slab_allocator(uint64_t block_size)
 void* get_page(fast_slab_metadata* metadata)
 {
     uint8_t* p = pagea_alloc(1);
+    for (uint64_t i = 0; i < PAGE_SIZE; i++) {
+        p[i] = 0;
+    }
     
     for (uint64_t i = metadata->block_size; i < PAGE_SIZE; i += metadata->block_size) {
         (*(uint64_t*)(p + i - metadata->block_size)) = (uint64_t)(p + i);
     }
-
-    (*(uint64_t*)(p + PAGE_SIZE / metadata->block_size)) = 0;
     
     return p;
 }

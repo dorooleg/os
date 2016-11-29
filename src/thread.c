@@ -153,7 +153,6 @@ void thread_yield_interrupt()
 
 void thread_yield()
 {
-    disable_ints();
     lock(&multithreading_lock);
     if (current_thread != NULL && current_thread->status == RUNNING) {
         list_push_back(&running_threads, current_thread);
@@ -165,12 +164,12 @@ void thread_yield()
         struct thread_t * old_thread = current_thread;
         current_thread = thread;
         unlock(&multithreading_lock);
+        disable_ints();
         switch_thread(&old_thread->sp, &thread->sp);
     }
     else
     {
         unlock(&multithreading_lock);
-        enable_ints();
     }
 }
 
@@ -186,6 +185,7 @@ void thread_destroy(struct thread_t* thread)
 
 void main_thread(struct thread_t* thread)
 {
+    printf("main thread %i\n", thread->tid);
     if (thread->status == INIT)
     {
         thread->status = RUNNING;

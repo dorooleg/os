@@ -24,7 +24,7 @@ struct thread_t
     uint64_t        stack_size; 
     thread_status   status;
     uint64_t        tid;
-};
+} __attribute__((packed));
 
 struct thread_frame
 {

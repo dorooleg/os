@@ -76,7 +76,7 @@ void irq_init()
     idt_set_gate(46, (unsigned long)irq14, KERNEL_CS, 0x8E);  
     idt_set_gate(47, (unsigned long)irq15, KERNEL_CS, 0x8E);  
 }
-#include <printf.h>
+
 void handler_irq(struct regs *r)
 {
     void (*handler)(struct regs *r);
