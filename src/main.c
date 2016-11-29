@@ -67,6 +67,11 @@ void main(void)
     qemu_gdb_hang();
     disable_ints();
 
+    void *mbi = (void *)((uintptr_t)multiboot_info_ptr);
+    balloc_setup(mbi);
+    paging_setup();
+    page_alloc_setup();
+
     init_io();
     idt_install();
     intr_install();
@@ -74,16 +79,10 @@ void main(void)
     pit_init();
     timer_init();
 
-    void *mbi = (void *)((uintptr_t)multiboot_info_ptr);
-    balloc_setup(mbi);
-    paging_setup();
-    page_alloc_setup();
 
     list_init();
     threads_init();
 
-
-    disable_ints();
     test_main();
     while (1);
 }

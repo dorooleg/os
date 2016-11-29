@@ -10,7 +10,6 @@ void mutex_lock(struct mutex_t * lock_)
 {
     if (lock_->locked) {
         lock(&multithreading_lock);
-        disable_ints();
         struct thread_t * current_thread = thread_get_current();
         list_push_back(&lock_->locked_threads, current_thread);
         mutex_thread_yield();

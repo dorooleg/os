@@ -1,5 +1,6 @@
 #ifndef __INTS_H__
 #define __INTS_H__
+#include <printf.h>
 
 int cnt;
 static inline void disable_ints(void)

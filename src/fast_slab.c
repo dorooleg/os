@@ -64,21 +64,17 @@ void free_fast_slab(fast_slab_metadata * metadata, void* addr)
 
 void* alloc_fast_slab_concurrent(fast_slab_metadata* metadata)
 {
-    disable_ints();
     lock(&metadata->memory_lock);
     void* ptr = alloc_fast_slab(metadata);
     unlock(&metadata->memory_lock);
-    enable_ints();
     return ptr;
 }
 
 void free_fast_slab_concurrent(fast_slab_metadata * metadata, void* addr)
 {
-    disable_ints();
     lock(&metadata->memory_lock);
     free_fast_slab(metadata, addr);
     unlock(&metadata->memory_lock);
-    enable_ints();
 }
 
 fast_slab_metadata create_fast_slab_allocator_concurrent(uint64_t block_size)

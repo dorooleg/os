@@ -4,11 +4,11 @@
 
 void lock(struct spinlock * lock)
 {
-    disable_ints();
     do
     {
         while (atomic_load_explicit(&lock->locked, memory_order_acquire) == LOCKED);
     } while (atomic_exchange_explicit(&lock->locked, LOCKED, memory_order_acquire) == LOCKED);
+    disable_ints();
 }
 
 char try_lock(struct spinlock * lock)

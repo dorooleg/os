@@ -17,7 +17,6 @@ void pit_init()
 void timer_handler(struct regs *r)
 {
     (void)r;
-    //printf("Timer %i\n", multithreading_lock.locked);
     if (r->code >= 40)
     {
         out8(0xA0, 0x20);

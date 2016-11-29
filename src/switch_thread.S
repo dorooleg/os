@@ -5,7 +5,6 @@
 
 main_thread_start:
         popq %rdi
-        sti
         callq main_thread
         loop: jmp loop
 

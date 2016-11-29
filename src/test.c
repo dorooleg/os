@@ -48,12 +48,12 @@ void test_list1()
  void test_list2()
 {
     {
-        uint64_t * v = pagea_alloc_concurrent(1);//alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
         *v = 0x7;
         list_push_front(&test_list, v);
     }
     {
-        uint64_t * v = pagea_alloc_concurrent(1); //alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
         *v = 0xf;
         list_push_front(&test_list, v);
     }
@@ -70,12 +70,12 @@ void test_list1()
  void test_list3()
 {
     {
-        uint64_t * v = pagea_alloc_concurrent(1); //alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
         *v = 0x7;
         list_push_front(&test_list, v);
     }
     {
-        uint64_t * v =pagea_alloc_concurrent(1); //alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
         *v = 0xf;
         list_push_back(&test_list, v);
     }
@@ -92,12 +92,12 @@ void test_list1()
  void test_list4()
 {
     {
-        uint64_t * v = pagea_alloc_concurrent(1); //alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
         *v = 0x7;
         list_push_front(&test_list, v);
     }
     {
-        uint64_t * v = pagea_alloc_concurrent(1); //alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
         *v = 0xf;
         list_push_back(&test_list, v);
     }
@@ -134,7 +134,7 @@ uint64_t vs[100];
  void test_list5()
 {
     for (uint32_t i = 0; i < 10; i++) {
-        uint64_t * v = pagea_alloc_concurrent(1); //alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
         *v = i;
         list_push_front(&test_list, v);
     }
@@ -170,7 +170,7 @@ uint64_t vs[100];
     assert(*(uint64_t*)(list_at(&test_list, 0)->value) == 8, "not found at 0 (test_list5)");
     assert(*(uint64_t*)(list_at(&test_list, 4)->value) == 0, "not found at 4 (test_list5)");
     {
-        uint64_t * v = pagea_alloc_concurrent(1); //alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
         *v = 9;
         list_insert_after(&test_list, eq8, v);
     }
@@ -226,7 +226,7 @@ void* fib(void* arg)
     return arg;
 }
 
- void print_thread_statistics()
+void print_thread_statistics()
 {
     print_current_thread();
     print_init_threads();
@@ -521,8 +521,8 @@ void accounts_test_mutex()
 void test_main()
 {
     printf("***TESTS BEGIN***\n");
-    test_allocator = create_fast_slab_allocator_concurrent(sizeof(uint64_t));
     enable_ints();
+    test_allocator = create_fast_slab_allocator_concurrent(sizeof(uint64_t));
     test_list_empty();
     test_list1();
     test_list2();
@@ -531,10 +531,13 @@ void test_main()
     test_list5();
     print_init_threads();
     operation_allocator = create_fast_slab_allocator_concurrent(sizeof(struct operation));
+    thread_test1();
     accounts_test();
     accounts_test();
     accounts_test_mutex();
-    thread_test1();
+    disable_ints();
+/*
+*/
 //    mutex_test();
 //    scheduler_test1();
     printf("***TESTS END***\n");

@@ -92,22 +92,17 @@ struct thread_t* thread_create(void *(*start_routine)(void *), void *arg)
 
 void thread_terminate()
 {
-    lock(&multithreading_lock);
-    current_thread->status = TERMINATED;
-    list_push_back(&terminated_threads, current_thread);
-    p_tid = current_thread->tid;
-    list_remove_first(&running_threads, predicate_tid, nothing);
-
     if (current_thread != NULL) {
+        lock(&multithreading_lock);
+        current_thread->status = TERMINATED;
+        list_push_back(&terminated_threads, current_thread);
+        p_tid = current_thread->tid;
+        list_remove_first(&running_threads, predicate_tid, nothing);
         struct thread_t* thread = list_top(&running_threads)->value;
         list_pop_front(&running_threads, nothing);
         struct thread_t * old_thread = current_thread;
         current_thread = thread;
-        unlock(&multithreading_lock);
         switch_thread(&old_thread->sp, &thread->sp);
-    }
-    else
-    {
         unlock(&multithreading_lock);
     }
 }
@@ -137,28 +132,21 @@ void mutex_thread_yield()
         list_pop_front(&running_threads, nothing);
         struct thread_t * old_thread = current_thread;
         current_thread = thread;
-        unlock(&multithreading_lock);
         switch_thread(&old_thread->sp, &thread->sp);
+        unlock(&multithreading_lock);
     }
 }
 
 void thread_yield()
 {
-    lock(&multithreading_lock);
     if (current_thread != NULL) {
+        lock(&multithreading_lock);
         list_push_back(&running_threads, current_thread);
-    }
-
-    if (current_thread != NULL) {
         struct thread_t* thread = list_top(&running_threads)->value;
         list_pop_front(&running_threads, nothing);
         struct thread_t * old_thread = current_thread;
         current_thread = thread;
-        unlock(&multithreading_lock);
         switch_thread(&old_thread->sp, &thread->sp);
-    }
-    else
-    {
         unlock(&multithreading_lock);
     }
 }
@@ -176,6 +164,7 @@ void thread_destroy(struct thread_t* thread)
 
 void main_thread(struct thread_t* thread)
 {
+    unlock(&multithreading_lock);
     if (thread->status == INIT)
     {
         thread->status = RUNNING;
