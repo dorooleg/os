@@ -20,7 +20,6 @@ static void qemu_gdb_hang(void)
 #include <backtrace.h>
 #include <ints.h>
 #include <multiboot.h>
-#include <virtual_memory.h>
 #include <malloc.h>
 #include <memory.h>
 #include <pagea.h>
@@ -28,6 +27,8 @@ static void qemu_gdb_hang(void)
 #include <test.h>
 #include <list.h>
 #include <thread.h>
+#include <balloc.h>
+#include <paging.h>
 
 extern uintptr_t text_phys_begin[];
 extern uintptr_t bss_phys_begin[];
@@ -35,10 +36,37 @@ extern uintptr_t bss_phys_end[];
 extern uintptr_t data_phys_begin[];
 extern uintptr_t data_phys_end[];
 
+void test_buddy(void)
+{
+    struct ext_list_head head;
+    unsigned long count = 0;
+
+    ext_list_init(&head);
+    while (1) {
+        struct page *page = __page_alloc(0);
+
+        if (!page)
+            break;
+        ++count;
+        ext_list_add(&page->ll, &head);
+    }
+
+    printf("Allocated %lu pages\n", count);
+
+    while (!ext_list_empty(&head)) {
+        struct ext_list_head *node = head.next;
+        struct page *page = CONTAINER_OF(node, struct page, ll);
+
+        ext_list_del(&page->ll);
+        __page_free(page, 0);
+    }
+}
+
 void main(void)
 {
-    //disable_ints();
     qemu_gdb_hang();
+    disable_ints();
+
     init_io();
     idt_install();
     intr_install();
@@ -46,26 +74,16 @@ void main(void)
     pit_init();
     timer_init();
 
-    interrupt(1);
+    void *mbi = (void *)((uintptr_t)multiboot_info_ptr);
+    balloc_setup(mbi);
+    paging_setup();
+    page_alloc_setup();
 
-
-    printf("text_phys_begin %p\n", text_phys_begin);
-    printf("bss_phys_begin %p\n", bss_phys_begin);
-    printf("bss_phys_end %p\n", bss_phys_end);
-    printf("data_phys_begin %p\n", data_phys_begin);
-    printf("data_phys_end %p\n", data_phys_end);
-
-    print_multiboot_info();
-    setup_memory();
-    print_physical_memory_table();
-
-    setup_mapping();    
-    print_physical_memory_table();
-    setup_pagea();
     list_init();
     threads_init();
-//    disable_ints();
-    enable_ints();
+
+
+    disable_ints();
     test_main();
     while (1);
 }

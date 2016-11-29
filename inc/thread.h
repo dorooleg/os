@@ -24,7 +24,7 @@ struct thread_t
     uint64_t        stack_size; 
     thread_status   status;
     uint64_t        tid;
-} __attribute__((packed));
+};
 
 struct thread_frame
 {
@@ -35,8 +35,8 @@ struct thread_frame
     uint64_t r12;
     uint64_t rbp;
     uint64_t rbx;
+    void    *rip;
     uint64_t rdi;
-    uint64_t rip;
 } __attribute__((packed));
 
 void threads_init();

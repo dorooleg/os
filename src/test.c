@@ -9,30 +9,31 @@
 #include <mutex.h>
 #include <ioport.h>
 #include <pagea.h>
+#include <stddef.h>
+#include <balloc.h>
 #include <memory.h>
 
 extern int counter_threads;
 void print_thread(void* value);
 
-static fast_slab_metadata test_allocator;  
+ fast_slab_metadata test_allocator;  
 
-static list_t * test_list = NULL;
+ list_t * test_list = NULL;
 
-static uint64_t acc = 0;
+ uint64_t acc = 0;
 
-static void test_list_empty()
+ void test_list_empty()
 {
     assert(list_top(&test_list) == NULL, "list_top is not null (test_list_empty)");
     assert(list_size(&test_list) == 0, "list_size is not 0 (test_list_empty)");
 }
 
-static void free_test_value_list(void * p)
+ void free_test_value_list(void * p)
 {
-    (void)p;
-    //free_fast_slab_concurrent(&test_allocator, p);
+    free_fast_slab_concurrent(&test_allocator, p);
 }
 
-static void test_list1()
+void test_list1()
 {
     uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
     *v = 0xf;
@@ -44,15 +45,15 @@ static void test_list1()
     assert(list_size(&test_list) == 0, "list_size is not 0 (test_list1)");
 }
 
-static void test_list2()
+ void test_list2()
 {
     {
-        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = pagea_alloc_concurrent(1);//alloc_fast_slab_concurrent(&test_allocator);
         *v = 0x7;
         list_push_front(&test_list, v);
     }
     {
-        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = pagea_alloc_concurrent(1); //alloc_fast_slab_concurrent(&test_allocator);
         *v = 0xf;
         list_push_front(&test_list, v);
     }
@@ -66,15 +67,15 @@ static void test_list2()
     assert(list_size(&test_list) == 0, "list_size is not 0 (test_list2)");
 }
 
-static void test_list3()
+ void test_list3()
 {
     {
-        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = pagea_alloc_concurrent(1); //alloc_fast_slab_concurrent(&test_allocator);
         *v = 0x7;
         list_push_front(&test_list, v);
     }
     {
-        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v =pagea_alloc_concurrent(1); //alloc_fast_slab_concurrent(&test_allocator);
         *v = 0xf;
         list_push_back(&test_list, v);
     }
@@ -88,15 +89,15 @@ static void test_list3()
     assert(list_size(&test_list) == 0, "list_size is not 0 (test_list3)");
 }
 
-static void test_list4()
+ void test_list4()
 {
     {
-        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = pagea_alloc_concurrent(1); //alloc_fast_slab_concurrent(&test_allocator);
         *v = 0x7;
         list_push_front(&test_list, v);
     }
     {
-        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = pagea_alloc_concurrent(1); //alloc_fast_slab_concurrent(&test_allocator);
         *v = 0xf;
         list_push_back(&test_list, v);
     }
@@ -110,30 +111,30 @@ static void test_list4()
     assert(list_size(&test_list) == 0, "list_size is not 0 (test_list4)");
 }
 
-static void sum(void *value) {
+ void sum(void *value) {
     acc += *(uint64_t*)value;
 }
-static char eq5(void *value) { return 5 == *(uint64_t*)value;
+ char eq5(void *value) { return 5 == *(uint64_t*)value;
 }
 
-static char eq1(void *value) {
+ char eq1(void *value) {
     return 1 == *(uint64_t*)value;
 }
 
-static char eq8(void *value) {
+ char eq8(void *value) {
     return 8 == *(uint64_t*)value;
 }
 
-static char odd(void *value) {
+ char odd(void *value) {
     return *(uint64_t*)value % 2;
 }
 
 uint64_t vs[100];
 
-static void test_list5()
+ void test_list5()
 {
     for (uint32_t i = 0; i < 10; i++) {
-        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = pagea_alloc_concurrent(1); //alloc_fast_slab_concurrent(&test_allocator);
         *v = i;
         list_push_front(&test_list, v);
     }
@@ -169,7 +170,7 @@ static void test_list5()
     assert(*(uint64_t*)(list_at(&test_list, 0)->value) == 8, "not found at 0 (test_list5)");
     assert(*(uint64_t*)(list_at(&test_list, 4)->value) == 0, "not found at 4 (test_list5)");
     {
-        uint64_t * v = alloc_fast_slab_concurrent(&test_allocator);
+        uint64_t * v = pagea_alloc_concurrent(1); //alloc_fast_slab_concurrent(&test_allocator);
         *v = 9;
         list_insert_after(&test_list, eq8, v);
     }
@@ -221,11 +222,11 @@ void* fib(void* arg)
         }
     }
     p->res = v1;
-    printf("FIB end\n");
+    printf("FIB end res = %i\n", v1);
     return arg;
 }
 
-static void print_thread_statistics()
+ void print_thread_statistics()
 {
     print_current_thread();
     print_init_threads();
@@ -243,8 +244,8 @@ void thread_test1()
     struct thread_t* t1 = thread_create(factorial, &fac_param);
     struct thread_t* t2 = thread_create(fib, &fib_param);
     struct thread_t* t3 = thread_create(factorial, &fac_param);
-    struct thread_t* t4 = thread_create(factorial, &fib_param);
-    struct thread_t* t5 = thread_create(factorial, &fib_param);
+    struct thread_t* t4 = thread_create(factorial, &fac_param);
+    struct thread_t* t5 = thread_create(factorial, &fac_param);
 
     printf("-----> Create <----\n");
     print_thread_statistics();
@@ -262,9 +263,6 @@ void thread_test1()
     printf("-----> Join <----\n");
     void* res;
     thread_join(t2, &res);
-    thread_join(t3, &res);
-    thread_join(t4, &res);
-    thread_join(t5, &res);
 
     print_thread_statistics();
 
@@ -281,7 +279,7 @@ void thread_test1()
 }
 
 #define DELAY 10000000
-static void* massiv_calc1(void* arg)
+ void* massiv_calc1(void* arg)
 {
     (void)arg;
     int n = 0;
@@ -295,7 +293,7 @@ static void* massiv_calc1(void* arg)
     return 0;
 }
 
-static void* massiv_calc2(void* arg)
+ void* massiv_calc2(void* arg)
 {
     (void)arg;
     int n = 0;
@@ -309,7 +307,7 @@ static void* massiv_calc2(void* arg)
     return 0;
 }
 
-static void* massiv_calc3(void* arg)
+ void* massiv_calc3(void* arg)
 {
     (void)arg;
     int n = 0;
@@ -344,7 +342,7 @@ void scheduler_test1()
 } 
 
 struct mutex_t global_mutex;
-static void* mutex_func(void* arg)
+void* mutex_func(void* arg)
 {
     (void)arg;
     int n = 0;
@@ -354,7 +352,6 @@ static void* mutex_func(void* arg)
         if (n % DELAY == 0) {
             out8(0xA0, 0x20);
             out8(0x20, 0x20);
-            enable_ints();
             counter_threads = 0;
             list_map(&global_mutex.locked_threads, print_thread);    
             printf("mutex\n");
@@ -393,33 +390,40 @@ struct operation
 
 int account1 = 1000;
 int account2 = 1000;
-static const uint32_t COUNT_THREADS = 5;
+const uint32_t COUNT_THREADS = 100;
 fast_slab_metadata operation_allocator;
 
 void* transfer(void * arg)
 {
     struct operation * op = (struct operation*)arg;
-    printf("Operation %p №%i begin\n", arg, op->n); 
+    //printf("Operation %p №%i begin\n", arg, op->n); 
     if (*op->from >= op->value) {
-        *op->from -= op->value;
-        *op->to += op->value;
+        int account1 = *op->from;
+        for (uint64_t i = 0; i < 1000000; i++) {
+            __asm__ volatile ("" : : : "memory");
+        }
+        account1 -= op->value;
+        *op->from = account1;
+        int account2 = *op->to; 
+        account2 += op->value;
+        *op->to = account2;
     }
-    printf("Operation %p №%i end\n", arg, op->n);
+    //printf("Operation %p №%i end\n", arg, op->n);
     return arg;
 }
 
 void accounts_test()
 {
-    operation_allocator = create_fast_slab_allocator_concurrent(sizeof(struct operation));
+    int account1 = 1000;
+    int account2 = 1000;
     struct thread_t **threads_array = pagea_alloc_concurrent(1);
     uint32_t threads_size = PAGE_SIZE / sizeof(void*);
     threads_size = threads_size < COUNT_THREADS ? threads_size : COUNT_THREADS;
 
-    printf("Account test: %lu \n", threads_size);
+    printf("Account test: %lu threads \n", threads_size);
 
     for (uint32_t i = 0; i < threads_size; i++) {
         struct operation * v = alloc_fast_slab_concurrent(&operation_allocator);
-        printf("ALLOC %p", v);
         v->n = i;
         if (i % 2 == 0) {
             v->from = &account1;
@@ -430,49 +434,95 @@ void accounts_test()
             v->to = &account1;
             v->value = 2;
         }
-        printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< main_thread operation %i begin\n", v->n); 
         threads_array[i] = thread_create(transfer, v);
     }
-    printf("-----> Create <----\n");
-    print_thread_statistics();
 
     for (uint32_t i = 0; i < threads_size; i++) {
         thread_start(threads_array[i]);
     }
-
-    printf("-----> Start <----\n");
-    print_thread_statistics();
     
     for (uint32_t i = 0; i < threads_size; i++) {
-        printf("JOIN %i\n", i);
         struct operation * arg;
         thread_join(threads_array[i], (void**)&arg);
-        printf("FREE %p\n", arg);
-    //    free_fast_slab_concurrent(&operation_allocator, arg); 
+        //free_fast_slab_concurrent(&operation_allocator, arg); 
     }
-
-    printf("-----> Join <----\n");
-    print_thread_statistics();
 
     for (uint32_t i = 0; i < threads_size; i++) {
         thread_destroy(threads_array[i]);
     }
 
-    printf("-----> Destroy <----\n");
-    print_thread_statistics();
+    printf("Account1 = %i Account2 = %i Sum = %i\n", account1, account2, account1 + account2);
+}
+
+struct mutex_t account_mutex;
+
+void* transfer_safe(void * arg)
+{
+    struct operation * op = (struct operation*)arg;
+    //printf("Operation %p №%i begin\n", arg, op->n); 
+    mutex_lock(&account_mutex);
+    if (*op->from >= op->value) {
+        int account1 = *op->from;
+        for (uint64_t i = 0; i < 1000000; i++) {
+            __asm__ volatile ("" : : : "memory");
+        }
+        account1 -= op->value;
+        *op->from = account1;
+        int account2 = *op->to; 
+        account2 += op->value;
+        *op->to = account2;
+    }
+    mutex_unlock(&account_mutex);
+    //printf("Operation %p №%i end\n", arg, op->n);
+    return arg;
+}
+
+void accounts_test_mutex()
+{
+    int account1 = 1000;
+    int account2 = 1000;
+    struct thread_t **threads_array = pagea_alloc_concurrent(1);
+    uint32_t threads_size = PAGE_SIZE / sizeof(void*);
+    threads_size = threads_size < COUNT_THREADS ? threads_size : COUNT_THREADS;
+    printf("Account test: %lu threads \n", threads_size);
+    for (uint32_t i = 0; i < threads_size; i++) {
+        struct operation * v = alloc_fast_slab_concurrent(&operation_allocator);
+        v->n = i;
+        if (i % 2 == 0) {
+            v->from = &account1;
+            v->to = &account2;
+            v->value = 1;
+        } else {
+            v->from = &account2;
+            v->to = &account1;
+            v->value = 2;
+        }
+        threads_array[i] = thread_create(transfer_safe, v);
+    }
+
+    for (uint32_t i = 0; i < threads_size; i++) {
+        thread_start(threads_array[i]);
+    }
+    
+    for (uint32_t i = 0; i < threads_size; i++) {
+        struct operation * arg;
+        thread_join(threads_array[i], (void**)&arg);
+        free_fast_slab_concurrent(&operation_allocator, arg); 
+    }
+
+    for (uint32_t i = 0; i < threads_size; i++) {
+        thread_destroy(threads_array[i]);
+    }
 
     printf("Account1 = %i Account2 = %i Sum = %i\n", account1, account2, account1 + account2);
 }
 
-#define RBP(x)    __asm__ ("movq %%rbp, %0" : "=rm"(x))
-#define RSP(x)    __asm__ ("movq %%rsp, %0" : "=rm"(x))
+
 void test_main()
 {
-    uintptr_t rsp;
-    RSP(rsp);
-    printf("RSP = %p\n", rsp);
-    printf("***TESTS BEGIN\n***");
+    printf("***TESTS BEGIN***\n");
     test_allocator = create_fast_slab_allocator_concurrent(sizeof(uint64_t));
+    enable_ints();
     test_list_empty();
     test_list1();
     test_list2();
@@ -480,8 +530,12 @@ void test_main()
     test_list4();
     test_list5();
     print_init_threads();
+    operation_allocator = create_fast_slab_allocator_concurrent(sizeof(struct operation));
     accounts_test();
-//    thread_test1();
+    accounts_test();
+    accounts_test_mutex();
+    thread_test1();
 //    mutex_test();
 //    scheduler_test1();
+    printf("***TESTS END***\n");
 }

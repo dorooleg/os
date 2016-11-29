@@ -9,10 +9,12 @@
 #include <ints.h>
 #include <pitlib.h>
 #include <ioport.h>
+#include <stddef.h>
 
 uint64_t gtid;
 
 struct spinlock multithreading_lock;
+void switch_thread(void **prev, void **next);
 
 static list_t * init_threads = NULL;
 list_t * running_threads = NULL;
@@ -67,6 +69,7 @@ struct thread_t* thread_create(void *(*start_routine)(void *), void *arg)
     thread->stack_head = pagea_alloc_concurrent(THREAD_MAX_STACK_SIZE);
     thread->sp = (uint8_t*)thread->stack_head + THREAD_MAX_STACK_SIZE * PAGE_SIZE - 1;
     thread->sp = (uint8_t*)thread->sp - sizeof(struct thread_frame);
+    extern void * main_thread_start;
     struct thread_frame * frame = thread->sp;
     frame->rflags = 0;
     frame->r15 = 0;
@@ -74,8 +77,8 @@ struct thread_t* thread_create(void *(*start_routine)(void *), void *arg)
     frame->r12 = 0;
     frame->rbp = 0;
     frame->rbx = 0;
+    frame->rip = &main_thread_start;
     frame->rdi = (uint64_t)thread;
-    frame->rip = (uint64_t)main_thread;
     thread->stack_size = THREAD_MAX_STACK_SIZE;
     thread->start_routine = start_routine;
     thread->arg = arg;
@@ -94,7 +97,19 @@ void thread_terminate()
     list_push_back(&terminated_threads, current_thread);
     p_tid = current_thread->tid;
     list_remove_first(&running_threads, predicate_tid, nothing);
-    thread_yield_interrupt();
+
+    if (current_thread != NULL) {
+        struct thread_t* thread = list_top(&running_threads)->value;
+        list_pop_front(&running_threads, nothing);
+        struct thread_t * old_thread = current_thread;
+        current_thread = thread;
+        unlock(&multithreading_lock);
+        switch_thread(&old_thread->sp, &thread->sp);
+    }
+    else
+    {
+        unlock(&multithreading_lock);
+    }
 }
 
 void thread_start(struct thread_t* thread)
@@ -115,25 +130,21 @@ void thread_join(struct thread_t* thread, void** result)
     *result = thread->result;
 }
 
-
-void switch_thread(void **prev, void *next);
-
 void mutex_thread_yield()
 {
-    lock(&multithreading_lock);
     if (current_thread != NULL) {
         struct thread_t* thread = list_top(&running_threads)->value;
         list_pop_front(&running_threads, nothing);
-        unlock(&multithreading_lock);
         struct thread_t * old_thread = current_thread;
         current_thread = thread;
+        unlock(&multithreading_lock);
         switch_thread(&old_thread->sp, &thread->sp);
     }
 }
 
 void thread_yield_interrupt()
 {
-    if (current_thread != NULL && current_thread->status == RUNNING) {
+    if (current_thread != NULL) {
         list_push_back(&running_threads, current_thread);
     }
 
@@ -154,7 +165,7 @@ void thread_yield_interrupt()
 void thread_yield()
 {
     lock(&multithreading_lock);
-    if (current_thread != NULL && current_thread->status == RUNNING) {
+    if (current_thread != NULL) {
         list_push_back(&running_threads, current_thread);
     }
 
@@ -164,7 +175,6 @@ void thread_yield()
         struct thread_t * old_thread = current_thread;
         current_thread = thread;
         unlock(&multithreading_lock);
-        disable_ints();
         switch_thread(&old_thread->sp, &thread->sp);
     }
     else
@@ -176,16 +186,16 @@ void thread_yield()
 void thread_destroy(struct thread_t* thread)
 {
     lock(&multithreading_lock);
-    //pagea_free_concurrent(thread->stack_head);
+    pagea_free_concurrent(thread->stack_head);
     p_tid = thread->tid;
     list_remove_first(&terminated_threads, predicate_tid, nothing);
     list_remove_first(&running_threads, predicate_tid, nothing);
+    list_remove_first(&init_threads, predicate_tid, nothing);
     unlock(&multithreading_lock);
 }
 
 void main_thread(struct thread_t* thread)
 {
-    printf("main thread %i\n", thread->tid);
     if (thread->status == INIT)
     {
         thread->status = RUNNING;
@@ -202,7 +212,10 @@ struct thread_t* thread_get_current()
 void print_current_thread()
 {
     printf("Current thread\n");
-    print_thread(current_thread);
+    if (current_thread != NULL) {
+        counter_threads = 0;
+        print_thread(current_thread);
+    }
 }
 
 void print_init_threads()
@@ -214,7 +227,7 @@ void print_init_threads()
 
 void print_running_threads()
 {
-    printf("Running threads\n");
+    printf("Running threads[%i]\n", list_size(&running_threads));
     counter_threads = 0;
     list_map(&running_threads, print_thread);    
 }

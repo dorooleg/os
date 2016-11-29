@@ -1,9 +1,14 @@
 .code64
 .section .text
-.global switch_thread
+.globl switch_thread
+.globl main_thread_start
+
+main_thread_start:
+        popq %rdi
+        callq main_thread
+        loop: jmp loop
 
 switch_thread:
-    pushq %rdi
     pushq %rbx
     pushq %rbp
     pushq %r12
@@ -22,7 +27,6 @@ switch_thread:
     popq %r12
     popq %rbp
     popq %rbx
-    popq %rdi
     sti
     
     ret

@@ -5,6 +5,7 @@
 #include <thread.h>
 #include <spinlock.h>
 #include <ints.h>
+#include <printf.h>
 
 extern struct spinlock multithreading_lock;
 
@@ -16,7 +17,7 @@ void pit_init()
 void timer_handler(struct regs *r)
 {
     (void)r;
-    //write("TIMER\n");
+    //printf("Timer %i\n", multithreading_lock.locked);
     if (r->code >= 40)
     {
         out8(0xA0, 0x20);
@@ -25,7 +26,6 @@ void timer_handler(struct regs *r)
     out8(0x20, 0x20);
     if (try_lock(&multithreading_lock)) {
         thread_yield_interrupt();
-        __asm__ volatile ("" : : : "memory");
     }
 }
 

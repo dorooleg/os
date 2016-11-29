@@ -51,7 +51,7 @@ void irq_remap()
     out8(0x20, 0xEE); //master data //mask devices
     out8(0xA0, 0xEE); //slave data //mask devices
 
-    enable_ints();
+    enable_ints(); 
 }
 
 
