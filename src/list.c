@@ -62,7 +62,7 @@ void list_pop_front(list_t **l, void (*destructor)(void * value))
     if (*l != NULL) {
         destructor((*l)->value); 
         list_t *n = (*l)->next;
-        free_fast_slab_concurrent(&list_allocator, *l); 
+        //free_fast_slab_concurrent(&list_allocator, *l); 
         *l = n; 
     }
 }
@@ -103,7 +103,7 @@ void list_remove_first(list_t **l, char (*predicate)(void *value), void (*destru
         if (f != s) {
             f->next = s->next;
             destructor(s->value); 
-            free_fast_slab_concurrent(&list_allocator, s); 
+            //free_fast_slab_concurrent(&list_allocator, s); 
         } else {
             list_pop_front(l, destructor);
         } 
@@ -119,7 +119,7 @@ void list_remove_all(list_t **l, char (*predicate)(void *value), void (*destruct
             if (f != s) {
                 f->next = s->next;
                 destructor(s->value); 
-                free_fast_slab_concurrent(&list_allocator, s); 
+                //free_fast_slab_concurrent(&list_allocator, s); 
                 s = f->next;
             } else {
                 list_pop_front(l, destructor);

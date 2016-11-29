@@ -8,8 +8,8 @@
 #include <ints.h>
 #include <mutex.h>
 #include <ioport.h>
-
-#define NULL 0
+#include <pagea.h>
+#include <memory.h>
 
 extern int counter_threads;
 void print_thread(void* value);
@@ -28,7 +28,8 @@ static void test_list_empty()
 
 static void free_test_value_list(void * p)
 {
-    free_fast_slab_concurrent(&test_allocator, p);
+    (void)p;
+    //free_fast_slab_concurrent(&test_allocator, p);
 }
 
 static void test_list1()
@@ -229,6 +230,7 @@ static void print_thread_statistics()
     print_init_threads();
     print_running_threads();
     print_terminated_threads();
+    printf("\n");
 }
 
 void thread_test1()
@@ -239,6 +241,9 @@ void thread_test1()
 
     struct thread_t* t1 = thread_create(factorial, &fac_param);
     struct thread_t* t2 = thread_create(fib, &fib_param);
+    struct thread_t* t3 = thread_create(factorial, &fac_param);
+    struct thread_t* t4 = thread_create(factorial, &fib_param);
+    struct thread_t* t5 = thread_create(factorial, &fib_param);
 
     printf("-----> Create <----\n");
     print_thread_statistics();
@@ -246,6 +251,9 @@ void thread_test1()
     printf("-----> Start <----\n");
     thread_start(t2);
     thread_start(t1);
+    thread_start(t3);
+    thread_start(t4);
+    thread_start(t5);
 
     printf("-----> Start(*) <----\n");
     print_thread_statistics();
@@ -253,10 +261,17 @@ void thread_test1()
     printf("-----> Join <----\n");
     void* res;
     thread_join(t2, &res);
+    thread_join(t3, &res);
+    thread_join(t4, &res);
+    thread_join(t5, &res);
+
     print_thread_statistics();
 
     thread_destroy(t1);
     thread_destroy(t2);
+    thread_destroy(t3);
+    thread_destroy(t4);
+    thread_destroy(t5);
 
     printf("----> Destroy <----\n");
     print_thread_statistics();
@@ -367,8 +382,103 @@ void mutex_test()
     thread_destroy(t2);
 }
 
+struct operation
+{
+    int n;
+    int *from;    
+    int *to;    
+    int value;
+};
+
+int account1 = 1000;
+int account2 = 1000;
+static const uint32_t COUNT_THREADS = 5;
+fast_slab_metadata operation_allocator;
+
+void* transfer(void * arg)
+{
+    struct operation * op = (struct operation*)arg;
+    printf("Operation %p №%i begin\n", arg, op->n); 
+    /*
+    if (*op->from >= op->value) {
+        *op->from -= op->value;
+        *op->to += op->value;
+    }
+    */
+    printf("Operation %p №%i %iend\n", arg, op->n, thread_get_current()->tid); 
+    return arg;
+}
+
+void accounts_test()
+{
+    operation_allocator = create_fast_slab_allocator_concurrent(sizeof(struct operation));
+    struct thread_t **threads_array = pagea_alloc_concurrent(1);
+    uint32_t threads_size = PAGE_SIZE / sizeof(void*);
+    threads_size = threads_size < COUNT_THREADS ? threads_size : COUNT_THREADS;
+
+    printf("Account test: %lu \n", threads_size);
+
+    for (uint32_t i = 0; i < threads_size; i++) {
+        struct operation * v = alloc_fast_slab_concurrent(&operation_allocator);
+        printf("ALLOC %p", v);
+        v->n = i;
+        if (i % 2 == 0) {
+            v->from = &account1;
+            v->to = &account2;
+            v->value = 1;
+        } else {
+            v->from = &account2;
+            v->to = &account1;
+            v->value = 2;
+        }
+        printf("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< main_thread operation %i begin\n", v->n); 
+        threads_array[i] = thread_create(transfer, v);
+    }
+
+    printf("-----> Create <----\n");
+    print_thread_statistics();
+
+    for (uint32_t i = 0; i < threads_size; i++) {
+        thread_start(threads_array[i]);
+    }
+
+    printf("-----> Start <----\n");
+    print_thread_statistics();
+    
+    for (int i = 0; i < 10000000; i++) {
+        __asm__ volatile ("" : : : "memory");
+    }
+
+/*
+    for (uint32_t i = 0; i < threads_size; i++) {
+        printf("JOIN %i\n", i);
+        struct operation * arg;
+        thread_join(threads_array[i], (void**)&arg);
+        printf("FREE %p", arg);
+    //    free_fast_slab_concurrent(&operation_allocator, arg); 
+    }
+*/
+
+    printf("-----> Join <----\n");
+    print_thread_statistics();
+
+    for (uint32_t i = 0; i < threads_size; i++) {
+        thread_destroy(threads_array[i]);
+    }
+
+    printf("-----> Destroy <----\n");
+    print_thread_statistics();
+
+    printf("Account1 = %i Account2 = %i Sum = %i\n", account1, account2, account1 + account2);
+}
+
+#define RBP(x)    __asm__ ("movq %%rbp, %0" : "=rm"(x))
+#define RSP(x)    __asm__ ("movq %%rsp, %0" : "=rm"(x))
 void test_main()
 {
+    uintptr_t rsp;
+    RSP(rsp);
+    printf("RSP = %p\n", rsp);
     printf("***TESTS BEGIN\n***");
     test_allocator = create_fast_slab_allocator_concurrent(sizeof(uint64_t));
     test_list_empty();
@@ -378,7 +488,8 @@ void test_main()
     test_list4();
     test_list5();
     print_init_threads();
-    thread_test1();
+    accounts_test();
+//    thread_test1();
 //    mutex_test();
 //    scheduler_test1();
 }

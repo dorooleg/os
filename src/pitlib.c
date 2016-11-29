@@ -3,7 +3,10 @@
 #include <ioport.h>
 #include <pitlib.h>
 #include <thread.h>
+#include <spinlock.h>
 #include <ints.h>
+
+extern struct spinlock multithreading_lock;
 
 void pit_init()
 {
@@ -20,7 +23,9 @@ void timer_handler(struct regs *r)
     }
 
     out8(0x20, 0x20);
-    thread_yield_interrupt();
+    if (try_lock(&multithreading_lock)) {
+        thread_yield_interrupt();
+    }
 }
 
 void timer_init()

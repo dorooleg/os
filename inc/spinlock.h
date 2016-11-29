@@ -12,6 +12,7 @@ struct spinlock
 };
 
 void lock(struct spinlock * lock);
+char try_lock(struct spinlock * lock);
 void unlock(struct spinlock * lock);
 
 #endif //__SPINLOCK_H__
