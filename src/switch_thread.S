@@ -5,6 +5,7 @@
 
 main_thread_start:
         popq %rdi
+        sti
         callq main_thread
         loop: jmp loop
 
@@ -27,6 +28,5 @@ switch_thread:
     popq %r12
     popq %rbp
     popq %rbx
-    sti
     
     ret
