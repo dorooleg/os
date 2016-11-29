@@ -449,7 +449,6 @@ void accounts_test()
         __asm__ volatile ("" : : : "memory");
     }
 
-/*
     for (uint32_t i = 0; i < threads_size; i++) {
         printf("JOIN %i\n", i);
         struct operation * arg;
@@ -457,7 +456,6 @@ void accounts_test()
         printf("FREE %p", arg);
     //    free_fast_slab_concurrent(&operation_allocator, arg); 
     }
-*/
 
     printf("-----> Join <----\n");
     print_thread_statistics();

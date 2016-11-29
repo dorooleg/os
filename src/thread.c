@@ -94,8 +94,7 @@ void thread_terminate()
     list_push_back(&terminated_threads, current_thread);
     p_tid = current_thread->tid;
     list_remove_first(&running_threads, predicate_tid, nothing);
-    unlock(&multithreading_lock);
-    thread_yield();
+    thread_yield_interrupt();
 }
 
 void thread_start(struct thread_t* thread)
@@ -143,7 +142,12 @@ void thread_yield_interrupt()
         list_pop_front(&running_threads, nothing);
         struct thread_t * old_thread = current_thread;
         current_thread = thread;
+        unlock(&multithreading_lock);
         switch_thread(&old_thread->sp, &thread->sp);
+    }
+    else
+    {
+        unlock(&multithreading_lock);
     }
 }
 
@@ -173,7 +177,7 @@ void thread_yield()
 void thread_destroy(struct thread_t* thread)
 {
     lock(&multithreading_lock);
-    pagea_free_concurrent(thread->stack_head);
+    //pagea_free_concurrent(thread->stack_head);
     p_tid = thread->tid;
     list_remove_first(&terminated_threads, predicate_tid, nothing);
     list_remove_first(&running_threads, predicate_tid, nothing);
