@@ -142,26 +142,6 @@ void mutex_thread_yield()
     }
 }
 
-void thread_yield_interrupt()
-{
-    if (current_thread != NULL) {
-        list_push_back(&running_threads, current_thread);
-    }
-
-    if (current_thread != NULL) {
-        struct thread_t* thread = list_top(&running_threads)->value;
-        list_pop_front(&running_threads, nothing);
-        struct thread_t * old_thread = current_thread;
-        current_thread = thread;
-        unlock(&multithreading_lock);
-        switch_thread(&old_thread->sp, &thread->sp);
-    }
-    else
-    {
-        unlock(&multithreading_lock);
-    }
-}
-
 void thread_yield()
 {
     lock(&multithreading_lock);

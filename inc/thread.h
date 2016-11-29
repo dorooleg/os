@@ -51,8 +51,6 @@ void thread_join(struct thread_t* thread, void** result);
 
 void thread_yield();
 
-void thread_yield_interrupt();
-
 void mutex_thread_yield();
 
 struct thread_t* thread_get_current();
