@@ -1,5 +1,5 @@
 #include <mutex.h>
-#include <spinlock.h>
+#include <lock.h>
 #include <ints.h>
 
 extern list_t * running_threads;
@@ -8,20 +8,20 @@ extern struct spinlock multithreading_lock;
 
 void mutex_lock(struct mutex_t * lock_)
 {
-    lock(&multithreading_lock);
+    locki();
     if (lock_->locked) {
         struct thread_t * current_thread = thread_get_current();
         list_push_back(&lock_->locked_threads, current_thread);
         mutex_thread_yield();
     } else {
         lock_->locked = 1;
-        unlock(&multithreading_lock);
+        unlocki();
     }
 }
 
 void mutex_unlock(struct mutex_t * lock_)
 {
-    lock(&multithreading_lock);
+    locki();
     if (list_size(&lock_->locked_threads) == 0) {
         lock_->locked = 0;
     } else {
@@ -29,5 +29,5 @@ void mutex_unlock(struct mutex_t * lock_)
         list_pop_front(&lock_->locked_threads, nothing);
         list_push_back(&running_threads, thread);
     }
-    unlock(&multithreading_lock);
+    unlocki();
 }

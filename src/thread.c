@@ -1,7 +1,7 @@
 #include <thread.h>
 #include <list.h>
 #include <memory.h>
-#include <spinlock.h>
+#include <lock.h>
 #include <fast_slab.h>
 #include <printf.h>
 #include <pagea.h>
@@ -13,7 +13,6 @@
 
 uint64_t gtid;
 
-struct spinlock multithreading_lock;
 void switch_thread(void **prev, void **next);
 
 static list_t * init_threads = NULL;
@@ -64,7 +63,7 @@ void threads_init()
 
 struct thread_t* thread_create(void *(*start_routine)(void *), void *arg)
 {
-    lock(&multithreading_lock);
+    locki();
     struct thread_t * thread = alloc_fast_slab_concurrent(&thread_t_allocator);
     thread->stack_head = pagea_alloc_concurrent(THREAD_MAX_STACK_SIZE);
     thread->sp = (uint8_t*)thread->stack_head + THREAD_MAX_STACK_SIZE * PAGE_SIZE - 1;
@@ -86,14 +85,14 @@ struct thread_t* thread_create(void *(*start_routine)(void *), void *arg)
     thread->status = INIT;
     thread->tid = gtid++;
     list_push_front(&init_threads, thread);
-    unlock(&multithreading_lock);
+    unlocki();
     return thread;
 }
 
 void thread_terminate()
 {
     if (current_thread != NULL) {
-        lock(&multithreading_lock);
+        locki();
         current_thread->status = TERMINATED;
         list_push_back(&terminated_threads, current_thread);
         p_tid = current_thread->tid;
@@ -103,17 +102,17 @@ void thread_terminate()
         struct thread_t * old_thread = current_thread;
         current_thread = thread;
         switch_thread(&old_thread->sp, &thread->sp);
-        unlock(&multithreading_lock);
+        unlocki();
     }
 }
 
 void thread_start(struct thread_t* thread)
 {
-    lock(&multithreading_lock);
+    locki();
     list_push_back(&running_threads, thread);
     p_tid = thread->tid;
     list_remove_first(&init_threads, predicate_tid, nothing);
-    unlock(&multithreading_lock);
+    unlocki();
 }
 
 void thread_join(struct thread_t* thread, void** result)
@@ -133,38 +132,38 @@ void mutex_thread_yield()
         struct thread_t * old_thread = current_thread;
         current_thread = thread;
         switch_thread(&old_thread->sp, &thread->sp);
-        unlock(&multithreading_lock);
+        unlocki();
     }
 }
 
 void thread_yield()
 {
     if (current_thread != NULL) {
-        lock(&multithreading_lock);
+        locki();
         list_push_back(&running_threads, current_thread);
         struct thread_t* thread = list_top(&running_threads)->value;
         list_pop_front(&running_threads, nothing);
         struct thread_t * old_thread = current_thread;
         current_thread = thread;
         switch_thread(&old_thread->sp, &thread->sp);
-        unlock(&multithreading_lock);
+        unlocki();
     }
 }
 
 void thread_destroy(struct thread_t* thread)
 {
-    lock(&multithreading_lock);
+    locki();
     pagea_free_concurrent(thread->stack_head);
     p_tid = thread->tid;
     list_remove_first(&terminated_threads, predicate_tid, nothing);
     list_remove_first(&running_threads, predicate_tid, nothing);
     list_remove_first(&init_threads, predicate_tid, nothing);
-    unlock(&multithreading_lock);
+    unlocki();
 }
 
 void main_thread(struct thread_t* thread)
 {
-    unlock(&multithreading_lock);
+    unlocki(); 
     if (thread->status == INIT)
     {
         thread->status = RUNNING;
