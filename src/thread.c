@@ -10,6 +10,7 @@
 #include <pitlib.h>
 #include <ioport.h>
 #include <stddef.h>
+#include <mutex.h>
 
 uint64_t gtid;
 
@@ -122,6 +123,20 @@ void thread_join(struct thread_t* thread, void** result)
         __asm__ volatile ("" : : : "memory");
     }
     *result = thread->result;
+}
+
+void cond_thread_yield(struct mutex_t * lock_)
+{
+    if (current_thread != NULL) {
+        struct thread_t* thread = list_top(&running_threads)->value;
+        list_pop_front(&running_threads, nothing);
+        struct thread_t * old_thread = current_thread;
+        current_thread = thread;
+        mutex_unlock(lock_);
+        switch_thread(&old_thread->sp, &thread->sp);
+        mutex_lock(lock_);
+        unlocki();
+    }
 }
 
 void mutex_thread_yield()

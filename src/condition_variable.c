@@ -6,31 +6,31 @@ extern list_t * running_threads;
 static void nothing(void *data) { (void)data; }
 extern struct spinlock multithreading_lock;
 
-void cond_wait(struct cond_t * lock_)
+void cond_wait(struct cond_t * cond, struct mutex_t * lock)
 {
     locki();
     struct thread_t * current_thread = thread_get_current();
-    list_push_back(&lock_->locked_threads, current_thread);
-    mutex_thread_yield();
+    list_push_back(&cond->locked_threads, current_thread);
+    cond_thread_yield(lock);
 }
 
-void cond_signal(struct cond_t * lock_)
+void cond_signal(struct cond_t * cond)
 {
     locki();
-    if (list_size(&lock_->locked_threads) != 0) {
-        struct thread_t* thread = list_top(&lock_->locked_threads)->value;
-        list_pop_front(&lock_->locked_threads, nothing);
+    if (list_size(&cond->locked_threads) != 0) {
+        struct thread_t* thread = list_top(&cond->locked_threads)->value;
+        list_pop_front(&cond->locked_threads, nothing);
         list_push_back(&running_threads, thread);
     }
     unlocki();
 }
 
-void cond_broadcast(struct cond_t * lock_)
+void cond_broadcast(struct cond_t * cond)
 {
     locki();
-    while (list_size(&lock_->locked_threads) != 0) {
-        struct thread_t* thread = list_top(&lock_->locked_threads)->value;
-        list_pop_front(&lock_->locked_threads, nothing);
+    while (list_size(&cond->locked_threads) != 0) {
+        struct thread_t* thread = list_top(&cond->locked_threads)->value;
+        list_pop_front(&cond->locked_threads, nothing);
         list_push_back(&running_threads, thread);
     }
     unlocki();

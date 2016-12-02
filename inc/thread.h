@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+struct mutex_t;
+
 typedef enum
 {
     INIT,
@@ -52,6 +54,8 @@ void thread_join(struct thread_t* thread, void** result);
 void thread_yield();
 
 void mutex_thread_yield();
+
+void cond_thread_yield(struct mutex_t * lock_);
 
 struct thread_t* thread_get_current();
 

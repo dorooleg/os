@@ -1,3 +1,4 @@
+#include <condition_variable.h>
 #include <test.h>
 #include <list.h>
 #include <printf.h>
@@ -518,6 +519,51 @@ void accounts_test_mutex()
 }
 
 
+struct mutex_t cond_mutex;
+struct cond_t cond_var;
+int w;
+
+void* fwait(void* noname)
+{
+    (void)noname;
+    mutex_lock(&cond_mutex);
+    printf("Wait...\n");
+    w = 1;
+    cond_wait(&cond_var, &cond_mutex);
+    printf("Wait Done...\n");
+    mutex_unlock(&cond_mutex);
+    return NULL;
+}
+
+void* fnotify(void* noname)
+{
+    (void)noname;
+    while (!w);
+    mutex_lock(&cond_mutex);
+    printf("Notify\n");
+    cond_signal(&cond_var);
+    printf("Notify Done\n");
+    mutex_unlock(&cond_mutex);
+    return NULL;
+}
+
+void cond_var_test()
+{
+    printf("Cond var test begin\n");
+    struct thread_t* t1 = thread_create(fwait, NULL);
+    struct thread_t* t2 = thread_create(fnotify, NULL);
+
+    thread_start(t2);
+    thread_start(t1);
+
+    thread_join(t1, (void*)&w);
+    thread_join(t2, (void*)&w);
+
+    thread_destroy(t1);
+    thread_destroy(t2);
+    printf("Cond var test end\n");
+}
+
 void test_main()
 {
     printf("***TESTS BEGIN***\n");
@@ -535,6 +581,7 @@ void test_main()
     accounts_test();
     accounts_test();
     accounts_test_mutex();
+    cond_var_test();
     disable_ints();
 /*
 */
